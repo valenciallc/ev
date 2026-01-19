@@ -450,39 +450,6 @@
             box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.2);
         }
 
-        .btn-generate {
-            background: linear-gradient(to right, var(--telegram-color), #1e96c8);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px auto 0;
-            width: 100%;
-            max-width: 350px;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
-        }
-
-        .btn-generate:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.4);
-        }
-
-        .btn-generate:active {
-            transform: translateY(-1px);
-        }
-
-        .btn-generate i {
-            font-size: 1.2rem;
-        }
-
         /* ========== CALCULATOR ========== */
         .calculator-container {
             background: white;
@@ -821,6 +788,69 @@
             display: inline-block;
         }
 
+        /* ========== GENERATE BUTTON AT BOTTOM ========== */
+        .generate-section {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            border-top: 5px solid var(--telegram-color);
+        }
+
+        .btn-generate {
+            background: linear-gradient(to right, var(--telegram-color), #1e96c8);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 300px;
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.4);
+        }
+
+        .btn-generate:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-generate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-generate:hover::before {
+            left: 100%;
+        }
+
+        .btn-generate i {
+            font-size: 1.3rem;
+        }
+
+        .btn-generate-text {
+            font-size: 1.1rem;
+        }
+
         /* ========== FOOTER ========== */
         .main-footer {
             text-align: center;
@@ -891,7 +921,8 @@
             .section-points,
             .header-icons,
             .language-switcher,
-            .notes-section {
+            .notes-section,
+            .generate-section {
                 display: none !important;
             }
 
@@ -1423,6 +1454,11 @@
                 right: calc(50% - 40px);
                 bottom: -10px;
             }
+
+            .btn-generate {
+                min-width: 250px;
+                padding: 15px 30px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1458,6 +1494,12 @@
 
             .lang-btn {
                 margin: 0 auto;
+            }
+
+            .btn-generate {
+                min-width: 100%;
+                padding: 14px 20px;
+                font-size: 1.1rem;
             }
         }
 
@@ -1772,11 +1814,6 @@
                     <input type="date" id="evaluationDate" class="evaluation-date">
                 </div>
             </div>
-
-            <button id="generateAndSend" class="btn-generate">
-                <i class="fab fa-telegram"></i>
-                <span id="generateButtonText">طباعة وإرسال التقرير</span>
-            </button>
         </div>
 
         <!-- ========== CALCULATOR ========== -->
@@ -1930,6 +1967,14 @@
                 <i class="fas fa-lightbulb"></i>
                 <span id="performanceTips"></span>
             </div>
+        </div>
+
+        <!-- ========== GENERATE BUTTON SECTION AT BOTTOM ========== -->
+        <div class="generate-section">
+            <button id="generateAndSend" class="btn-generate">
+                <i class="fab fa-telegram"></i>
+                <span class="btn-generate-text" id="generateButtonText">طباعة وإرسال التقرير</span>
+            </button>
         </div>
 
         <!-- ========== PRINT NOTES SUMMARY ========== -->
