@@ -2238,8 +2238,8 @@
                         { id: 'ammar', name: 'عمار فادي عوض', position: { ar: 'مصور', en: 'Photographer' } },
                         { id: 'samer', name: 'سامر جنيد', position: { ar: 'مونتاج', en: 'Video Editor' } },
                         { id: 'rabah', name: 'رباح الحموي', position: { ar: 'مصمم إعلان/ناشر/متفاعل', en: 'Ad Designer/Publisher/Engager' } },
-                        { id: 'menna_allah', name: 'منه الله علاء', position: { ar: 'سوشيال', en: 'Designer' } },
-                        { id: 'rania', name: 'رانيا فريد', position: { ar: 'سوشيال', en: 'Designer' } }
+                        { id: 'menna_allah', name: 'منه الله علاء', position: { ar: 'سوشيال', en: 'Social media' } },
+                        { id: 'rania', name: 'رانيا فريد', position: { ar: 'سوشيال', en: 'Social media' } }
                     ],
                     criteria: {
                         photographer: [
@@ -2950,8 +2950,8 @@
                         return dept.criteria.photographer || [];
                     } else if (employeeText.includes('مونتاج') || employeeText.includes('Video Editor')) {
                         return dept.criteria.editor || [];
-                    } else if (employeeText.includes('مصمم') || employeeText.includes('Designer')) {
-                        return dept.criteria.designer || [];
+                    } else if (employeeText.includes('سوشيال ميديا') || employeeText.includes('Social media')) {
+                        return dept.criteria.Social media || [];
                     }
                 } else if (deptId === 'projects') {
                     if (employeeText.includes('فورمان') || employeeText.includes('Foreman')) {
