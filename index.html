@@ -2786,36 +2786,91 @@
                 marketing: {
     name: { ar: '📱 قسم التسويق الإلكتروني والسوشيال ميديا', en: '📱 Digital Marketing and Social Media Department' },
     manager: 'أمين أحمد حجازي',
-    employees: [
-        { id: 'ammar', name: 'عمار فادي عوض', position: { ar: 'مصور', en: 'Photographer' } },
-        { id: 'samer', name: 'سامر جنيد', position: { ar: 'مونتاج', en: 'Video Editor' } },
-        { id: 'rabah', name: 'رباح الحموي', position: { ar: 'مصمم إعلان/ناشر/متفاعل', en: 'Ad Designer/Publisher/Engager' } },
-        { id: 'menna_allah', name: 'منه الله علاء', position: { ar: 'سوشيال ميديا', en: 'Social Media' } },
-        { id: 'rania', name: 'رانيا فريد', position: { ar: 'سوشيال ميديا', en: 'Social Media' } }
-    ],
-    criteria: {
-        photographer: [
-                            { id: 'photo_quality', name: { ar: 'جودة التصوير', en: 'Photo Quality' }, weight: 8 },
-                            { id: 'content_creativity', name: { ar: 'التنوع والإبداع في المحتوى', en: 'Content Variety and Creativity' }, weight: 7 },
-                            { id: 'production_speed', name: { ar: 'سرعة الإنتاج', en: 'Production Speed' }, weight: 7 },
-                            { id: 'coordination', name: { ar: 'التنسيق مع فريق المونتاج والتسويق', en: 'Coordination with Editing and Marketing Team' }, weight: 6 },
-                            { id: 'peak_hours', name: { ar: 'التواجد المستمر في اوقات الذروة', en: 'Continuous Presence During Peak Hours' }, weight: 6 }
-                        ],
-                        editor: [
-                            { id: 'editing_quality', name: { ar: 'جودة المونتاج', en: 'Editing Quality' },
-                              description: { ar: 'التصاميم والإعلانات', en: 'Designs and advertisements' }, weight: 8 },
-                            { id: 'delivery_speed', name: { ar: 'سرعة التسليم', en: 'Delivery Speed' }, weight: 7 },
-                            { id: 'editing_creativity', name: { ar: 'الإبداع في التحرير', en: 'Creativity in Editing' }, weight: 7 },
-                            { id: 'visual_identity', name: { ar: 'الالتزام بالهوية البصرية', en: 'Adherence to Visual Identity' }, weight: 6 }
-                        ],
-                        designer: [
-                            { id: 'campaign_management', name: { ar: 'مستوى المعلومات عن الدولة وكيفية الرد والتعامل مع شعبها', en: 'Paid Advertising Campaign Management' }, weight: 7 },
-                            { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 8 },
-                            { id: 'publishing_schedule', name: { ar: 'مدى الجاهزيه بأوقات الذروة و العروض والضغط', en: 'Publishing Schedule and Timeliness' }, weight: 7 },
-                            { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 7 },
-                            { id: 'page_coordination', name: { ar: 'مستوى معلوماتهم و خبرتهم في مجال أعمال الشركة', en: 'Page and Publication Coordination' }, weight: 6 }
-                        ]
-                    }
+    
+                    departments: {
+       
+        photographer: {
+            title: { ar: 'فريق التصوير', en: 'Photography Team' },
+            employees: [
+                { 
+                    id: 'ammar', 
+                    name: 'عمار فادي عوض', 
+                    position: { ar: 'مصور', en: 'Photographer' }
+                }
+            ],
+            criteria: [
+                { id: 'photo_quality', name: { ar: 'جودة التصوير', en: 'Photo Quality' }, weight: 8 },
+                { id: 'content_creativity', name: { ar: 'التنوع والإبداع في المحتوى', en: 'Content Variety and Creativity' }, weight: 7 },
+                { id: 'production_speed', name: { ar: 'سرعة الإنتاج', en: 'Production Speed' }, weight: 7 },
+                { id: 'coordination', name: { ar: 'التنسيق مع فريق المونتاج والتسويق', en: 'Coordination with Editing and Marketing Team' }, weight: 6 },
+                { id: 'peak_hours', name: { ar: 'التواجد المستمر في اوقات الذروة', en: 'Continuous Presence During Peak Hours' }, weight: 6 }
+            ]
+        },
+        
+        editor: {
+            title: { ar: 'فريق المونتاج', en: 'Editing Team' },
+            employees: [
+                { 
+                    id: 'samer', 
+                    name: 'سامر جنيد', 
+                    position: { ar: 'مونتاج', en: 'Video Editor' }
+                }
+            ],
+            criteria: [
+                { 
+                    id: 'editing_quality', 
+                    name: { ar: 'جودة المونتاج', en: 'Editing Quality' },
+                    description: { ar: 'التصاميم والإعلانات', en: 'Designs and advertisements' }, 
+                    weight: 8 
+                },
+                { id: 'delivery_speed', name: { ar: 'سرعة التسليم', en: 'Delivery Speed' }, weight: 7 },
+                { id: 'editing_creativity', name: { ar: 'الإبداع في التحرير', en: 'Creativity in Editing' }, weight: 7 },
+                { id: 'visual_identity', name: { ar: 'الالتزام بالهوية البصرية', en: 'Adherence to Visual Identity' }, weight: 6 }
+            ]
+        },
+        
+        designer: {
+            title: { ar: 'فريق التصميم والإعلانات', en: 'Design and Advertising Team' },
+            employees: [
+                { 
+                    id: 'rabah', 
+                    name: 'رباح الحموي', 
+                    position: { ar: 'مصمم إعلان/ناشر/متفاعل', en: 'Ad Designer/Publisher/Engager' }
+                }
+            ],
+            criteria: [
+                { id: 'campaign_management', name: { ar: 'إدارة الحملات الإعلانية المدفوعة', en: 'Paid Advertising Campaign Management' }, weight: 7 },
+                { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 8 },
+                { id: 'publishing_schedule', name: { ar: 'الالتزام بجدول النشر في أوقات الذروة', en: 'Publishing Schedule and Timeliness' }, weight: 7 },
+                { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 7 },
+                { id: 'page_coordination', name: { ar: 'تنسيق الصفحات والمحتوى', en: 'Page and Publication Coordination' }, weight: 6 }
+            ]
+        },
+        
+        social_media: {
+            title: { ar: 'فريق السوشيال ميديا', en: 'Social Media Team' },
+            employees: [
+                { 
+                    id: 'menna_allah', 
+                    name: 'منه الله علاء', 
+                    position: { ar: 'سوشيال ميديا', en: 'Social Media Specialist' }
+                },
+                { 
+                    id: 'rania', 
+                    name: 'رانيا فريد', 
+                    position: { ar: 'سوشيال ميديا', en: 'Social Media Specialist' }
+                }
+            ],
+            criteria: [
+                { id: 'campaign_management', name: { ar: 'مستوى المعلومات عن الدولة وكيفية الرد والتعامل مع شعبها', en: 'Paid Advertising Campaign Management' }, weight: 7 },
+                { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 8 },
+                { id: 'publishing_schedule', name: { ar: 'مدى الجاهزيه بأوقات الذروة و العروض والضغط', en: 'Publishing Schedule and Timeliness' }, weight: 7 },
+                { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 7 },
+                { id: 'page_coordination', name: { ar: 'مستوى معلوماتهم و خبرتهم في مجال أعمال الشركة', en: 'Page and Publication Coordination' }, weight: 6 }
+            ]
+        }
+    }
+}
                 },
 
                 projects: {
@@ -3515,6 +3570,8 @@
                         return dept.criteria.editor || [];
                     } else if (employeeText.includes('مصمم') || employeeText.includes('Designer')) {
                         return dept.criteria.designer || [];
+                    } else if (employeeText.includes('السوشيال ميديا') || employeeText.includes('Social Media Specialist')) {
+                        return dept.criteria.Social Media Specialist || [];
                     }
                 } else if (deptId === 'projects') {
                     if (employeeText.includes('فورمان') || employeeText.includes('Foreman')) {
