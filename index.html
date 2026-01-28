@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unified Evaluation Form - Valencia Marble & Natural Stone Company</title>
+    <title>النموذج الموحد للتقييم - شركة فالنسيا للرخام والحجر الطبيعي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ========== RESET & BASE ========== */
@@ -483,45 +483,6 @@
             font-size: 1.2rem;
         }
 
-        /* ========== CALCULATOR ========== */
-        .calculator-container {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            box-shadow: var(--box-shadow);
-            border-right: 5px solid var(--success-color);
-        }
-
-        .calculator-title {
-            color: var(--secondary-color);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3rem;
-        }
-
-        .calculator-formula {
-            font-family: 'Courier New', monospace;
-            background: var(--light-color);
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            font-size: 1.2rem;
-            color: var(--success-color);
-            text-align: center;
-            border: 1px dashed var(--success-color);
-        }
-
-        .calculator-example {
-            background: #f0f9ff;
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            color: var(--secondary-color);
-        }
-
         /* ========== NOTES SECTIONS ========== */
         .notes-section {
             background: white;
@@ -850,198 +811,129 @@
             text-decoration: underline;
         }
 
-        /* ========== PRINT STYLES ========== */
+        /* ========== PRINT STYLES - IMPROVED ========== */
         @media print {
             @page {
-                size: A4 landscape !important;
-                margin: 8mm !important;
+                size: A4 landscape;
+                margin: 0.5cm;
             }
 
             body {
                 background: white !important;
                 color: black !important;
-                font-family: 'Times New Roman', serif !important;
-                font-size: 9pt !important;
-                line-height: 1.1 !important;
+                font-family: 'Arial', sans-serif !important;
+                font-size: 10pt !important;
+                line-height: 1.3 !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
             }
 
             .container {
                 max-width: 100% !important;
-                margin: 0 !important;
                 padding: 0 !important;
-                transform: scale(0.98) !important;
-                transform-origin: top center !important;
+                margin: 0 !important;
+                transform: none !important;
             }
 
-            /* إخفاء كل ما لا يريد طباعته */
-            .main-header,
+            /* إخفاء العناصر غير الضرورية للطباعة */
+            .language-switcher,
             .instructions-container,
             .controls-container,
-            .calculator-container,
+            .notes-section,
             .btn-generate,
             .main-footer,
-            .notification,
-            .rating-controls,
+            .logo-upload-btn,
             .rating-btn,
-            .section-header,
-            .section-points,
-            .header-icons,
-            .language-switcher,
-            .notes-section,
-            .logo-upload-btn {
+            .section-header .section-points,
+            .rating-controls,
+            .notification,
+            .progress-container {
                 display: none !important;
             }
 
-            /* ========== PRINT REPORT HEADER ========== */
-            .print-report-header {
+            /* إظهار عناصر الطباعة */
+            .print-report-header,
+            .print-signatures,
+            .notes-summary {
                 display: block !important;
+                page-break-inside: avoid;
+            }
+
+            /* تنسيق رأس الطباعة */
+            .print-report-header {
                 text-align: center;
-                margin-bottom: 5px !important;
-                padding-bottom: 5px !important;
-                border-bottom: 1px solid #000;
-                page-break-after: avoid;
+                margin-bottom: 10px !important;
+                padding: 10px;
+                border-bottom: 2px solid #000;
             }
 
             .print-report-header h1 {
-                font-size: 14pt !important;
-                color: #000;
-                margin-bottom: 3px !important;
-                font-weight: bold;
-            }
-
-            .print-report-header .company-name {
-                font-size: 9pt !important;
-                color: #333;
-                margin-bottom: 5px !important;
+                font-size: 18pt !important;
+                margin-bottom: 5px;
+                color: #000 !important;
             }
 
             .print-info-table {
                 width: 100% !important;
+                margin: 10px 0 !important;
                 border-collapse: collapse;
-                margin: 5px 0 !important;
-                font-size: 8pt !important;
-                page-break-inside: avoid;
+                font-size: 9pt !important;
             }
 
+            .print-info-table th,
             .print-info-table td {
-                padding: 3px 5px !important;
+                padding: 4px 6px !important;
                 border: 1px solid #000;
                 text-align: center;
             }
 
             .print-info-table th {
-                padding: 3px 5px !important;
-                border: 1px solid #000;
-                background-color: #f0f0f0;
+                background-color: #f0f0f0 !important;
                 font-weight: bold;
-                text-align: center;
             }
 
-            /* ========== COMPANY LOGO IN PRINT ========== */
-            .company-logo-container {
-                display: block !important;
-                position: absolute;
-                top: 5px;
-                left: 5px;
-            }
-
-            .company-logo {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                background: white !important;
-                border: 1px solid #000 !important;
-                box-shadow: none !important;
-            }
-
-            .company-logo img {
-                padding: 3px !important;
-            }
-
-            /* ========== COMPACT LAYOUT FOR PRINT ========== */
-            .sections-container,
-            .summary-container,
-            .total-score-container,
-            .notes-summary {
-                display: block !important;
-                page-break-inside: avoid !important;
-                margin: 3mm 0 !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-                border-radius: 0 !important;
-                background: white !important;
-                color: black !important;
-                page-break-before: avoid !important;
-                page-break-after: avoid !important;
-            }
-
-            /* ========== COMPACT SECTION CARDS ========== */
+            /* تنسيق الجداول للطباعة */
             .section-card {
-                margin: 0 0 5px 0 !important;
+                margin: 5px 0 !important;
                 border: 1px solid #000 !important;
-                border-radius: 0 !important;
                 box-shadow: none !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                max-height: none !important;
+                page-break-inside: avoid;
             }
 
             .section-title {
-                color: #000 !important;
-                font-size: 9pt !important;
-                font-weight: bold !important;
-                padding: 3px 4px !important;
-                border-bottom: 1px solid #000 !important;
                 background-color: #f0f0f0 !important;
-                margin: 0 !important;
-                page-break-after: avoid !important;
+                color: #000 !important;
+                padding: 5px 10px !important;
+                font-size: 11pt !important;
+                border-bottom: 1px solid #000 !important;
             }
 
-            /* ========== COMPACT CRITERIA TABLES ========== */
             .criteria-table {
                 width: 100% !important;
+                font-size: 8pt !important;
                 border: 1px solid #000 !important;
-                font-size: 7pt !important;
-                page-break-inside: auto !important;
-                border-collapse: collapse !important;
-                margin: 0 !important;
             }
 
             .criteria-table th {
                 background: #f0f0f0 !important;
                 color: #000 !important;
+                padding: 3px 5px !important;
                 border: 1px solid #000 !important;
-                padding: 2px 3px !important;
-                font-weight: bold !important;
+                font-size: 8pt !important;
                 text-align: center !important;
-                font-size: 7pt !important;
-                height: auto !important;
             }
 
             .criteria-table td {
+                padding: 3px 5px !important;
                 border: 1px solid #666 !important;
-                padding: 2px 3px !important;
-                font-size: 7pt !important;
+                font-size: 8pt !important;
                 text-align: center !important;
                 vertical-align: middle !important;
-                height: auto !important;
-                line-height: 1 !important;
             }
 
             .criteria-name {
                 color: #000 !important;
                 font-weight: bold !important;
-                text-align: right !important;
-                font-size: 7pt !important;
-            }
-
-            .criteria-description {
-                color: #666 !important;
-                font-size: 6pt !important;
                 text-align: right !important;
             }
 
@@ -1049,288 +941,117 @@
                 background: #f8f8f8 !important;
                 color: #000 !important;
                 border: 1px solid #666 !important;
-                padding: 1px 3px !important;
-                border-radius: 1px !important;
-                font-weight: bold !important;
-                display: inline-block !important;
-                min-width: 20px !important;
-                font-size: 7pt !important;
+                padding: 1px 4px !important;
+                font-size: 8pt !important;
             }
 
             .calculated-value {
                 background: #f8f8f8 !important;
                 color: #000 !important;
                 border: 1px solid #666 !important;
-                padding: 1px 3px !important;
-                border-radius: 1px !important;
-                font-weight: bold !important;
-                display: inline-block !important;
-                font-size: 7pt !important;
-                min-width: 30px !important;
+                padding: 1px 4px !important;
+                font-size: 8pt !important;
             }
 
             /* إظهار القيم المختارة للطباعة */
             .printed-rating {
-                display: inline !important;
-                font-weight: bold;
-                font-size: 7pt !important;
-                padding: 0 2px !important;
-                background-color: #f0f0f0;
-                border-radius: 1px;
+                display: inline-block !important;
+                padding: 1px 4px;
                 border: 1px solid #666;
-                margin-right: 2px !important;
+                background: #f0f0f0;
+                font-weight: bold;
+                min-width: 20px;
+                text-align: center;
             }
 
-            /* ========== COMPACT SUMMARY ========== */
+            /* ملخص النتائج للطباعة */
             .summary-container {
                 background: #f0f0f0 !important;
-                color: black !important;
+                color: #000 !important;
                 border: 1px solid #000 !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                padding: 5px !important;
-                margin: 5px 0 !important;
+                padding: 10px !important;
+                margin: 10px 0 !important;
             }
 
             .summary-grid {
                 display: grid !important;
                 grid-template-columns: repeat(4, 1fr) !important;
-                gap: 5px !important;
-                text-align: center;
+                gap: 10px !important;
             }
 
             .summary-item {
                 background: white !important;
                 border: 1px solid #000 !important;
-                color: black !important;
-                padding: 4px !important;
-                margin: 0 !important;
-            }
-
-            .summary-title {
-                color: #000 !important;
-                font-size: 9pt !important;
-                margin-bottom: 5px !important;
-            }
-
-            .summary-label {
-                font-size: 7pt !important;
-                margin-bottom: 2px !important;
+                padding: 8px !important;
             }
 
             .summary-value {
-                font-size: 10pt !important;
-                font-weight: 700 !important;
-                margin: 2px 0 !important;
+                font-size: 14pt !important;
             }
 
-            .summary-subtext {
-                font-size: 6pt !important;
-            }
-
-            /* ========== COMPACT TOTAL SCORE ========== */
+            /* النتيجة الإجمالية */
             .total-score-container {
                 background: #e9ecef !important;
-                color: black !important;
-                border: 1px solid #000 !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                padding: 8px !important;
-                margin: 5px 0 !important;
-                text-align: center;
-            }
-
-            .total-score-label {
-                font-size: 8pt !important;
-                margin-bottom: 2px !important;
+                color: #000 !important;
+                border: 2px solid #000 !important;
+                padding: 15px !important;
+                margin: 10px 0 !important;
             }
 
             .total-score-value {
-                font-size: 16pt !important;
-                font-weight: 800 !important;
-                margin: 2px 0 !important;
+                font-size: 20pt !important;
             }
 
-            .total-score-grade {
-                font-size: 9pt !important;
-                font-weight: 600 !important;
-                margin-top: 2px !important;
-                padding: 2px 6px !important;
-                background: rgba(255, 255, 255, 0.5);
-                border-radius: 15px;
-                display: inline-block;
-            }
-
-            .progress-container {
-                display: none !important;
-            }
-
-            /* ========== COMPACT NOTES ========== */
-            .notes-summary {
-                background: #f0f0f0 !important;
-                color: black !important;
-                border: 1px solid #000 !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                padding: 5px !important;
-                margin: 5px 0 2px 0 !important;
-            }
-
-            .notes-summary-title {
-                color: #000 !important;
-                font-size: 9pt !important;
-                margin-bottom: 3px !important;
-            }
-
+            /* الملاحظات للطباعة */
             .printed-notes {
-                display: block !important;
-                background: white !important;
                 border: 1px solid #000 !important;
-                padding: 3px !important;
-                margin-top: 2px !important;
-                margin-bottom: 2px !important;
-                min-height: 20px !important;
-                max-height: 40px !important;
-                white-space: pre-wrap !important;
-                font-size: 7pt !important;
-                overflow: hidden !important;
+                padding: 5px !important;
+                margin: 5px 0 !important;
+                min-height: 20px;
+                font-size: 8pt !important;
+                white-space: pre-wrap;
             }
 
-            /* ========== COMPACT SIGNATURES ========== */
-            .print-signatures {
-                display: block !important;
-                margin-top: 5px !important;
-                border-top: 1px solid #000;
-                padding-top: 5px;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
-
-            .print-signatures h3 {
-                text-align: center;
-                margin-bottom: 5px !important;
-                font-size: 9pt !important;
-                font-weight: bold;
-            }
-
+            /* التوقيعات */
             .signature-box {
-                border: 1px solid #000;
-                padding: 4px;
-                height: 50px !important;
-                margin-top: 3px !important;
-                text-align: center;
+                border: 1px solid #000 !important;
+                padding: 15px !important;
+                height: 60px !important;
+                margin: 5px !important;
                 position: relative;
-                page-break-inside: avoid !important;
             }
 
             .signature-line {
+                position: absolute;
+                bottom: 25px;
+                left: 10%;
+                width: 80%;
                 border-top: 1px solid #000;
-                margin-top: 15px !important;
-                width: 100%;
-                position: absolute;
-                bottom: 15px !important;
-                left: 0;
             }
 
-            .signature-date {
-                position: absolute;
-                bottom: 5px !important;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 6pt !important;
-            }
-
-            .signature-name {
-                position: absolute;
-                bottom: 20px !important;
-                left: 50%;
-                transform: translateX(-50%);
-                font-weight: bold;
-                font-size: 7pt !important;
-            }
-
-            /* ========== PAGE BREAK CONTROL ========== */
-            h1, h2, h3, h4 {
-                page-break-after: avoid !important;
-                page-break-inside: avoid !important;
+            /* التحكم في فواصل الصفحات */
+            h1, h2, h3 {
+                page-break-after: avoid;
             }
 
             table {
-                page-break-inside: auto !important;
+                page-break-inside: auto;
             }
 
             tr {
-                page-break-inside: avoid !important;
-                page-break-after: auto !important;
+                page-break-inside: avoid;
+                page-break-after: auto;
             }
 
-            td, th {
-                page-break-inside: avoid !important;
-                page-break-before: auto !important;
-            }
-
-            /* تجنب تقسيم الصفوف في الجداول */
-            .criteria-table tr {
-                height: 15px !important;
-                max-height: 15px !important;
-                page-break-inside: avoid !important;
-            }
-
-            /* ========== COMPRESS TABLE LAYOUT ========== */
-            .criteria-table th:nth-child(2),
-            .criteria-table td:nth-child(2) {
-                width: 25% !important;
-            }
-
-            .criteria-table th:nth-child(1) { width: 35% !important; }
-            .criteria-table th:nth-child(3) { width: 10% !important; }
-            .criteria-table th:nth-child(4) { width: 15% !important; }
-            .criteria-table th:nth-child(5) { width: 15% !important; }
-
-            /* ========== REMOVE UNNECESSARY SPACING ========== */
-            .sections-container {
-                margin-bottom: 5px !important;
-            }
-
-            * {
-                margin-top: 0 !important;
-                margin-bottom: 0 !important;
-                padding-top: 0 !important;
-                padding-bottom: 0 !important;
-            }
-
-            /* ========== PRINT WATERMARK ========== */
+            /* ختم مائي خفيف */
             body::after {
-                content: "Valencia Marble & Natural Stone Company";
+                content: "Valencia Marble Evaluation";
                 position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-45deg);
-                font-size: 25pt !important;
-                color: rgba(0, 0, 0, 0.03) !important;
-                z-index: -1;
-                white-space: nowrap;
-                pointer-events: none;
-            }
-
-            /* ========== FORCE SINGLE PAGE ========== */
-            body, html {
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            /* ========== FLEXIBLE ROW HEIGHTS ========== */
-            .criteria-table td {
-                height: auto !important;
-                min-height: 15px !important;
-            }
-
-            /* ========== COMPACT LAYOUT FOR MULTIPLE SECTIONS ========== */
-            .sections-container {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                gap: 2px !important;
-                margin: 0 !important;
+                bottom: 10px;
+                right: 10px;
+                font-size: 8pt;
+                color: rgba(0, 0, 0, 0.1);
+                opacity: 0.5;
             }
         }
 
@@ -1450,7 +1171,7 @@
             transition: width 0.5s ease;
         }
 
-        /* ========== NOTIFICATION ========== */
+        /* ========== NOTIFICATION - FIXED ========== */
         .notification {
             position: fixed;
             top: 20px;
@@ -1501,13 +1222,34 @@
             color: var(--telegram-color);
         }
 
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .notification-message {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
         .notification-close {
             background: none;
             border: none;
             font-size: 1.2rem;
             cursor: pointer;
             color: var(--gray-color);
-            margin-right: auto;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* ========== PRINT ELEMENTS ========== */
@@ -1644,40 +1386,6 @@
                     <span id="instructionAutoSendText">يتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة</span>
                 </div>
             </div>
-
-            <div style="margin-top: 20px;">
-                <strong id="ratingScaleTitle">مقياس التقييم (من 1 إلى 5 نقاط):</strong>
-                <div class="rating-scale">
-                    <div class="rating-item">
-                        <div class="rating-value">5</div>
-                        <div class="rating-label" id="rating5Label">ممتاز</div>
-                    </div>
-                    <div class="rating-item">
-                        <div class="rating-value">4</div>
-                        <div class="rating-label" id="rating4Label">جيد جداً</div>
-                    </div>
-                    <div class="rating-item">
-                        <div class="rating-value">3</div>
-                        <div class="rating-label" id="rating3Label">جيد</div>
-                    </div>
-                    <div class="rating-item">
-                        <div class="rating-value">2</div>
-                        <div class="rating-label" id="rating2Label">مقبول</div>
-                    </div>
-                    <div class="rating-item">
-                        <div class="rating-value">1</div>
-                        <div class="rating-label" id="rating1Label">ضعيف</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="calculator-example" style="margin-top: 20px;">
-                <strong id="formulaTitle">معادلة حساب النقاط:</strong> <span id="formulaText">القيمة المحسوبة = (التقييم ÷ 5) × الوزن</span>
-                <br>
-                <strong id="exampleTitle">مثال:</strong> <span id="exampleText">إذا كان الوزن = 8 والتقييم = 4 ← القيمة = (4 ÷ 5) × 8 = 6.4 نقطة</span>
-                <br>
-                <strong id="noteTitle">ملاحظة:</strong> <span id="noteText">سيتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة</span>
-            </div>
         </div>
 
         <!-- ========== CONTROLS ========== -->
@@ -1741,22 +1449,6 @@
             </button>
         </div>
 
-        <!-- ========== CALCULATOR ========== -->
-        <div class="calculator-container">
-            <div class="calculator-title">
-                <i class="fas fa-calculator"></i>
-                <span id="calculatorTitle">حاسبة النقاط</span>
-            </div>
-            <div class="calculator-formula" id="calculatorFormula">
-                القيمة المحسوبة = (التقييم ÷ 5) × الوزن
-            </div>
-            <div class="calculator-example">
-                <strong id="explanationTitle">توضيح:</strong> <span id="explanationText">كل معيار له وزن محدد (بين 1-10 نقاط) وتقييم من 1-5</span>
-                <br>
-                <strong id="totalPointsTitle">النقاط الكلية:</strong> <span id="totalPointsText">15 نقطة للمعايير العامة + 85 نقطة لمعايير القسم = 100 نقطة إجمالاً</span>
-            </div>
-        </div>
-
         <!-- ========== NOTES SECTIONS ========== -->
         <div class="notes-section">
             <div class="notes-title">
@@ -1801,10 +1493,10 @@
                 <div class="section-header">
                     <div class="section-title">
                         <i class="fas fa-star"></i>
-                        <span id="generalCriteriaTitle">المعايير العامة المشتركة</span>
+                        <span id="generalCriteriaTitle">المعايير العامة المشتركة (وزن كل معيار: 10)</span>
                     </div>
                     <div class="section-points">
-                        <span class="lang-points">النقاط:</span> <span id="generalScore">0</span>/15
+                        <span class="lang-points">النقاط:</span> <span id="generalScore">0</span>/40
                     </div>
                 </div>
                 <div class="section-content">
@@ -1830,7 +1522,7 @@
                 <div class="section-header">
                     <div class="section-title">
                         <i class="fas fa-briefcase"></i>
-                        <span id="departmentCriteriaTitle">معايير القسم</span>
+                        <span id="departmentCriteriaTitle">معايير القسم (وزن كل معيار: 10)</span>
                     </div>
                     <div class="section-points">
                         <span class="lang-points">النقاط:</span> <span id="departmentScore">0</span>/85
@@ -1857,13 +1549,13 @@
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="summary-label" id="summaryGeneralLabel">المعايير العامة</div>
-                    <div class="summary-value" id="summaryGeneral">0/15</div>
-                    <div class="summary-subtext"><span class="lang-outof">من</span> 15 <span class="lang-points">نقطة</span></div>
+                    <div class="summary-value" id="summaryGeneral">0/40</div>
+                    <div class="summary-subtext"><span class="lang-outof">من</span> 40 <span class="lang-points">نقطة</span></div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-label" id="summaryDepartmentLabel">معايير القسم</div>
                     <div class="summary-value" id="summaryDepartment">0/85</div>
-                    <div class="summary-subtext"><span class="lang-outof">من</span> 85 <span class="lang-points">نقطة</span></div>
+                    <div class="summary-subtext"><span class="lang-outof">من</span> 85/ <span class="lang-points">تختلف باختلاف القسم</span></div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-label" id="summaryPercentageLabel">النسبة المئوية</div>
@@ -1947,14 +1639,14 @@
             </div>
         </div>
 
-        <!-- ========== NOTIFICATION ========== -->
+        <!-- ========== NOTIFICATION - FIXED ========== -->
         <div id="notification" class="notification">
             <div class="notification-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="notification-content">
-                <strong id="notificationTitle">تم الإرسال بنجاح</strong>
-                <div id="notificationMessage">سيتم إرسال التقرير إلى قناة الموارد البشرية</div>
+                <div class="notification-title" id="notificationTitle"></div>
+                <div class="notification-message" id="notificationMessage"></div>
             </div>
             <button class="notification-close">
                 <i class="fas fa-times"></i>
@@ -2002,26 +1694,17 @@
                 instructionAutoSendTitle: "الإرسال التلقائي:",
                 instructionAutoSendText: "يتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة",
 
-                // Rating Scale
-                ratingScaleTitle: "مقياس التقييم (من 1 إلى 5 نقاط):",
-                rating5Label: "ممتاز",
-                rating4Label: "جيد جداً",
-                rating3Label: "جيد",
-                rating2Label: "مقبول",
-                rating1Label: "ضعيف",
-
                 // Calculator
                 formulaTitle: "معادلة حساب النقاط:",
-                formulaText: "القيمة المحسوبة = (التقييم ÷ 5) × الوزن",
+                formulaText: "القيمة المحسوبة = (التقييم ÷ 5) × 10",
                 exampleTitle: "مثال:",
-                exampleText: "إذا كان الوزن = 8 والتقييم = 4 ← القيمة = (4 ÷ 5) × 8 = 6.4 نقطة",
+                exampleText: "إذا كان التقييم = 4 ← القيمة = (4 ÷ 5) × 10 = 8 نقطة",
                 noteTitle: "ملاحظة:",
                 noteText: "سيتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة",
                 explanationTitle: "توضيح:",
-                explanationText: "كل معيار له وزن محدد (بين 1-10 نقاط) وتقييم من 1-5",
+                explanationText: "كل معيار له وزن ثابت (10 نقاط) وتقييم من 1-5",
                 totalPointsTitle: "النقاط الكلية:",
                 totalPointsText: "15 نقطة للمعايير العامة + 85 نقطة لمعايير القسم = 100 نقطة إجمالاً",
-                calculatorTitle: "حاسبة النقاط",
 
                 // Settings
                 settingsTitle: "إعدادات التقييم",
@@ -2045,8 +1728,8 @@
                 supervisor: "اختر المشرف",
 
                 // Sections
-                generalCriteriaTitle: "المعايير العامة المشتركة",
-                departmentCriteriaTitle: "معايير القسم",
+                generalCriteriaTitle: "المعايير العامة المشتركة (وزن كل معيار: 10)",
+                departmentCriteriaTitle: "معايير القسم (وزن كل معيار: 10)",
                 selectPromptTitle: "اختر القسم والموظف",
                 selectPromptText: "يرجى اختيار القسم والموظف من أعلى الصفحة لعرض معايير التقييم الخاصة به",
 
@@ -2104,30 +1787,6 @@
                 termsLink: "شروط الاستخدام",
                 contactLink: "اتصل بنا",
                 supportLink: "الدعم الفني",
-
-                // General Criteria
-                generalCriteria: [
-                    {
-                        id: 'discipline',
-                        name: 'الانضباط والالتزام',
-                        description: 'الحضور، الالتزام باللوائح'
-                    },
-                    {
-                        id: 'teamwork',
-                        name: 'العمل الجماعي والتعاون',
-                        description: 'التعاون مع الفريق، تقبل التوجيهات'
-                    },
-                    {
-                        id: 'productivity',
-                        name: 'الإنتاجية والإنجاز',
-                        description: 'إنجاز المهام في الوقت، إدارة الوقت'
-                    },
-                    {
-                        id: 'initiative',
-                        name: 'المبادرة والتحسين',
-                        description: 'اقتراح تحسينات، حل المشكلات'
-                    }
-                ]
             },
 
             en: {
@@ -2166,13 +1825,13 @@
 
                 // Calculator
                 formulaTitle: "Points Calculation Formula:",
-                formulaText: "Calculated Value = (Rating ÷ 5) × Weight",
+                formulaText: "Calculated Value = (Rating ÷ 5) × 10",
                 exampleTitle: "Example:",
-                exampleText: "If weight = 8 and rating = 4 → Value = (4 ÷ 5) × 8 = 6.4 points",
+                exampleText: "If rating = 4 → Value = (4 ÷ 5) × 10 = 8 points",
                 noteTitle: "Note:",
                 noteText: "A copy of the report will be automatically sent to the HR channel when printing",
                 explanationTitle: "Explanation:",
-                explanationText: "Each criterion has a specific weight (1-10 points) and rating from 1-5",
+                explanationText: "Each criterion has a fixed weight (10 points) and rating from 1-5",
                 totalPointsTitle: "Total Points:",
                 totalPointsText: "15 points for general criteria + 85 points for department criteria = 100 points total",
                 calculatorTitle: "Points Calculator",
@@ -2199,8 +1858,8 @@
                 supervisor: "Select a supervisor",
 
                 // Sections
-                generalCriteriaTitle: "General Shared Criteria",
-                departmentCriteriaTitle: "Department Criteria",
+                generalCriteriaTitle: "General Shared Criteria (Weight per criterion: 10)",
+                departmentCriteriaTitle: "Department Criteria (Weight per criterion: 10)",
                 selectPromptTitle: "Select Department and Employee",
                 selectPromptText: "Please select the department and employee from above to display their evaluation criteria",
 
@@ -2258,30 +1917,6 @@
                 termsLink: "Terms of Use",
                 contactLink: "Contact Us",
                 supportLink: "Technical Support",
-
-                // General Criteria
-                generalCriteria: [
-                    {
-                        id: 'discipline',
-                        name: 'Discipline and Commitment',
-                        description: 'Attendance, compliance with regulations'
-                    },
-                    {
-                        id: 'teamwork',
-                        name: 'Teamwork and Cooperation',
-                        description: 'Team collaboration, acceptance of guidance'
-                    },
-                    {
-                        id: 'productivity',
-                        name: 'Productivity and Achievement',
-                        description: 'Task completion on time, time management'
-                    },
-                    {
-                        id: 'initiative',
-                        name: 'Initiative and Improvement',
-                        description: 'Suggesting improvements, problem solving'
-                    }
-                ]
             }
         };
 
@@ -2290,7 +1925,7 @@
             BOT_TOKEN: "8211546767:AAHzI71x7Tj06MaJ2I8N1DI92zFmn_ZIHeg",
             HR_CHANNEL: "-1003528917325",
             SCORES: {
-                GENERAL_MAX: 15,
+                GENERAL_MAX: 40,
                 DEPARTMENT_MAX: 85,
                 TOTAL_MAX: 100
             }
@@ -2599,13 +2234,13 @@
         const ORGANIZATION_DATA = {
             general: [
                 { id: 'discipline', name: { ar: 'الانضباط والالتزام', en: 'Discipline and Commitment' },
-                  description: { ar: 'الحضور، الالتزام باللوائح', en: 'Attendance, compliance with regulations' }, weight: 3 },
+                  description: { ar: 'الحضور، الالتزام باللوائح', en: 'Attendance, compliance with regulations' }, weight: 10 },
                 { id: 'teamwork', name: { ar: 'العمل الجماعي والتعاون', en: 'Teamwork and Cooperation' },
-                  description: { ar: 'التعاون مع الفريق، تقبل التوجيهات', en: 'Team collaboration, acceptance of guidance' }, weight: 4 },
+                  description: { ar: 'التعاون مع الفريق، تقبل التوجيهات', en: 'Team collaboration, acceptance of guidance' }, weight: 10 },
                 { id: 'productivity', name: { ar: 'الإنتاجية والإنجاز', en: 'Productivity and Achievement' },
-                  description: { ar: 'إنجاز المهام في الوقت، إدارة الوقت', en: 'Task completion on time, time management' }, weight: 4 },
+                  description: { ar: 'إنجاز المهام في الوقت، إدارة الوقت', en: 'Task completion on time, time management' }, weight: 10 },
                 { id: 'initiative', name: { ar: 'المبادرة والتحسين', en: 'Initiative and Improvement' },
-                  description: { ar: 'اقتراح تحسينات، حل المشكلات', en: 'Suggesting improvements, problem solving' }, weight: 4 }
+                  description: { ar: 'اقتراح تحسينات، حل المشكلات', en: 'Suggesting improvements, problem solving' }, weight: 10 }
             ],
 
             departments: {
@@ -2634,42 +2269,42 @@
                     criteria: {
                         sales_rep: [
                             { id: 'appearance', name: { ar: 'المظهر الخارجي', en: 'External Appearance' },
-                              description: { ar: 'اللباس، تسريحة الشعر، النظافة', en: 'Clothing, hairstyle, cleanliness' }, weight: 5 },
+                              description: { ar: 'اللباس، تسريحة الشعر، النظافة', en: 'Clothing, hairstyle, cleanliness' }, weight: 10 },
                             { id: 'customer_interaction', name: { ar: 'التعامل مع العميل', en: 'Customer Interaction' },
-                              description: { ar: 'اللباقة، الاحترافية، مهارات الاتصال', en: 'Politeness, professionalism, communication skills' }, weight: 8 },
+                              description: { ar: 'اللباقة، الاحترافية، مهارات الاتصال', en: 'Politeness, professionalism, communication skills' }, weight: 10 },
                             { id: 'response_speed', name: { ar: 'الاستجابة السريعة', en: 'Quick Response' },
-                              description: { ar: 'سرعة الرد على الاستفسارات', en: 'Quick response to inquiries' }, weight: 6 },
+                              description: { ar: 'سرعة الرد على الاستفسارات', en: 'Quick response to inquiries' }, weight: 10 },
                             { id: 'after_sales', name: { ar: 'حل المشاكل ما بعد البيع', en: 'After-Sales Problem Solving' },
-                              description: { ar: 'متابعة الشكاوى، إرضاء العملاء', en: 'Follow-up on complaints, customer satisfaction' }, weight: 7 },
+                              description: { ar: 'متابعة الشكاوى، إرضاء العملاء', en: 'Follow-up on complaints, customer satisfaction' }, weight: 10 },
                             { id: 'old_customers', name: { ar: 'متابعة العملاء القدامى', en: 'Follow-up with Old Customers' },
-                              description: { ar: 'الاتصال الدوري، تجديد العلاقات', en: 'Periodic contact, relationship renewal' }, weight: 6 },
+                              description: { ar: 'الاتصال الدوري، تجديد العلاقات', en: 'Periodic contact, relationship renewal' }, weight: 10 },
                             { id: 'pricing_negotiation', name: { ar: 'قدرات البيع ضمن حدود السعر', en: 'Pricing Negotiation Skills' },
-                              description: { ar: 'المرونة في التفاوض', en: 'Flexibility in negotiation' }, weight: 7 },
+                              description: { ar: 'المرونة في التفاوض', en: 'Flexibility in negotiation' }, weight: 10 },
                             { id: 'quotation_pricing', name: { ar: 'تسعير عروض الأسعار', en: 'Quotation Pricing' },
-                              description: { ar: 'الدقة، التنافسية', en: 'Accuracy, competitiveness' }, weight: 7 },
+                              description: { ar: 'الدقة، التنافسية', en: 'Accuracy, competitiveness' }, weight: 10 },
                             { id: 'sales_network', name: { ar: 'قبول شاب المبيعات للعميل', en: 'Accepting Customer Network Preferences' },
-                              description: { ar: 'تقديم البدائل المناسبة', en: 'Providing suitable alternatives' }, weight: 6 },
+                              description: { ar: 'تقديم البدائل المناسبة', en: 'Providing suitable alternatives' }, weight: 10 },
                             { id: 'product_knowledge', name: { ar: 'حفظ المواد بالمواصفات', en: 'Product Knowledge' },
-                              description: { ar: 'المعرفة بالمنتجات', en: 'Knowledge of products' }, weight: 7 },
+                              description: { ar: 'المعرفة بالمنتجات', en: 'Knowledge of products' }, weight: 10 },
                             { id: 'stone_info', name: { ar: 'حفظ معلومات الحجر', en: 'Stone Information Knowledge' },
-                              description: { ar: 'المعرفة بالأنواع والجودة', en: 'Knowledge of types and quality' }, weight: 7 },
+                              description: { ar: 'المعرفة بالأنواع والجودة', en: 'Knowledge of types and quality' }, weight: 10 },
                             { id: 'selling_slow_moving', name: { ar: 'القدرة على بيع الأصناف الراكدة', en: 'Ability to Sell Slow-Moving Items' },
-                              description: { ar: 'الإقناع، العروض الخاصة', en: 'Persuasion, special offers' }, weight: 6 }
+                              description: { ar: 'الإقناع، العروض الخاصة', en: 'Persuasion, special offers' }, weight: 10 }
                         ],
                         delivery_staff: [
                             { id: 'delivery_speed', name: { ar: 'سرعة التوصيل', en: 'Delivery Speed' },
-                              description: { ar: 'الالتزام بالمواعيد', en: 'Commitment to schedules' }, weight: 8 },
+                              description: { ar: 'الالتزام بالمواعيد', en: 'Commitment to schedules' }, weight: 10 },
                             { id: 'professional_interaction', name: { ar: 'التعامل المهني مع العملاء', en: 'Professional Interaction with Customers' },
-                              description: { ar: 'اللباقة، حل المشكلات', en: 'Politeness, problem solving' }, weight: 7 },
+                              description: { ar: 'اللباقة، حل المشكلات', en: 'Politeness, problem solving' }, weight: 10 },
                             { id: 'goods_safety', name: { ar: 'سلامة البضائع', en: 'Goods Safety' },
-                              description: { ar: 'العناية أثناء النقل', en: 'Care during transportation' }, weight: 8 },
+                              description: { ar: 'العناية أثناء النقل', en: 'Care during transportation' }, weight: 10 },
                             { id: 'route_planning', name: { ar: 'تنظيم وتخطيط المسارات', en: 'Route Planning and Organization' },
-                              description: { ar: 'الكفاءة في التنقل', en: 'Travel efficiency' }, weight: 7 }
+                              description: { ar: 'الكفاءة في التنقل', en: 'Travel efficiency' }, weight: 10 }
                         ],
                         delivery_workers: [
-                            { id: 'loading_speed', name: { ar: 'سرعة تحميل وتنزيل البضائع', en: 'Loading and Unloading Speed' }, weight: 9 },
-                            { id: 'goods_arrangement', name: { ar: 'ترتيب البضائع بشكل آمن', en: 'Safe Goods Arrangement' }, weight: 8 },
-                            { id: 'delivery_instructions', name: { ar: 'الالتزام بتعليمات التسليم', en: 'Adherence to Delivery Instructions' }, weight: 8 }
+                            { id: 'loading_speed', name: { ar: 'سرعة تحميل وتنزيل البضائع', en: 'Loading and Unloading Speed' }, weight: 10 },
+                            { id: 'goods_arrangement', name: { ar: 'ترتيب البضائع بشكل آمن', en: 'Safe Goods Arrangement' }, weight: 10 },
+                            { id: 'delivery_instructions', name: { ar: 'الالتزام بتعليمات التسليم', en: 'Adherence to Delivery Instructions' }, weight: 10 }
                         ]
                     }
                 },
@@ -2718,18 +2353,18 @@
                     },
                     criteria: [
                         { id: 'order_distribution', name: { ar: 'توزيع الأوامر', en: 'Order Distribution' },
-                          description: { ar: 'الدقة، التنظيم', en: 'Accuracy, organization' }, weight: 8 },
+                          description: { ar: 'الدقة، التنظيم', en: 'Accuracy, organization' }, weight: 10 },
                         { id: 'personal_cleanliness', name: { ar: 'النظافة الشخصية', en: 'Personal Cleanliness' },
-                          description: { ar: 'نظافة الزي، النظافة العامة', en: 'Uniform cleanliness, general cleanliness' }, weight: 6 },
+                          description: { ar: 'نظافة الزي، النظافة العامة', en: 'Uniform cleanliness, general cleanliness' }, weight: 10 },
                         { id: 'new_tasks', name: { ar: 'قبول مهام جديدة والتكيف معها', en: 'Accepting and Adapting to New Tasks' },
-                          description: { ar: 'المرونة', en: 'Flexibility' }, weight: 7 },
+                          description: { ar: 'المرونة', en: 'Flexibility' }, weight: 10 },
                         { id: 'physical_strength', name: { ar: 'القوة البدنية', en: 'Physical Strength' },
-                          description: { ar: 'القدرة على حمل الأوزان', en: 'Ability to carry weights' }, weight: 6 },
+                          description: { ar: 'القدرة على حمل الأوزان', en: 'Ability to carry weights' }, weight: 10 },
                         { id: 'stone_repair', name: { ar: 'إصلاح الحجر المكسور', en: 'Repair of Broken Stone' },
-                          description: { ar: 'المهارة، الإبداع في الإصلاح', en: 'Skill, creativity in repair' }, weight: 7 },
-                        { id: 'storage_accuracy', name: { ar: 'دقة التخزين والجرد', en: 'Storage and Inventory Accuracy' }, weight: 9 },
-                        { id: 'task_speed', name: { ar: 'سرعة تنفيذ المهام', en: 'Task Execution Speed' }, weight: 8 },
-                        { id: 'safety_procedures', name: { ar: 'الالتزام بإجراءات السلامة', en: 'Adherence to Safety Procedures' }, weight: 8 }
+                          description: { ar: 'المهارة، الإبداع في الإصلاح', en: 'Skill, creativity in repair' }, weight: 10 },
+                        { id: 'storage_accuracy', name: { ar: 'دقة التخزين والجرد', en: 'Storage and Inventory Accuracy' }, weight: 10 },
+                        { id: 'task_speed', name: { ar: 'سرعة تنفيذ المهام', en: 'Task Execution Speed' }, weight: 10 },
+                        { id: 'safety_procedures', name: { ar: 'الالتزام بإجراءات السلامة', en: 'Adherence to Safety Procedures' }, weight: 10 }
                     ]
                 },
 
@@ -2743,18 +2378,18 @@
                     ],
                     criteria: [
                         { id: '3d_accuracy', name: { ar: 'معدل دقة الـ3D', en: '3D Accuracy Rate' },
-                          description: { ar: 'التفاصيل، الواقعية', en: 'Details, realism' }, weight: 9 },
+                          description: { ar: 'التفاصيل، الواقعية', en: 'Details, realism' }, weight: 10 },
                         { id: 'quotation_speed', name: { ar: 'سرعة تنفيذ عرض السعر', en: 'Quotation Execution Speed' },
-                          description: { ar: 'الكفاءة', en: 'Efficiency' }, weight: 8 },
+                          description: { ar: 'الكفاءة', en: 'Efficiency' }, weight: 10 },
                         { id: 'quick_wit', name: { ar: 'سرعة البديهة', en: 'Quick Wit' },
-                          description: { ar: 'رد الفعل، الحلول السريعة', en: 'Reaction, quick solutions' }, weight: 7 },
+                          description: { ar: 'رد الفعل، الحلول السريعة', en: 'Reaction, quick solutions' }, weight: 10 },
                         { id: 'design_problems', name: { ar: 'حل المشاكل التصميمية', en: 'Solving Design Problems' },
-                          description: { ar: 'الإبداع في الحلول', en: 'Creativity in solutions' }, weight: 8 },
-                        { id: 'quantity_accuracy', name: { ar: 'دقة الكميات والحسابات', en: 'Quantity and Calculation Accuracy' }, weight: 9 },
-                        { id: 'material_knowledge', name: { ar: 'حفظ المواد والديكورات بالمواصفات', en: 'Material and Decor Knowledge' }, weight: 7 },
+                          description: { ar: 'الإبداع في الحلول', en: 'Creativity in solutions' }, weight: 10 },
+                        { id: 'quantity_accuracy', name: { ar: 'دقة الكميات والحسابات', en: 'Quantity and Calculation Accuracy' }, weight: 10 },
+                        { id: 'material_knowledge', name: { ar: 'حفظ المواد والديكورات بالمواصفات', en: 'Material and Decor Knowledge' }, weight: 10 },
                         { id: 'quotation_pricing', name: { ar: 'تسعير عروض الأسعار', en: 'Quotation Pricing' },
-                          description: { ar: 'الدقة، التنافسية', en: 'Accuracy, competitiveness' }, weight: 8 },
-                        { id: 'delivery_deadlines', name: { ar: 'الالتزام بمواعيد التسليم', en: 'Adherence to Delivery Deadlines' }, weight: 7 }
+                          description: { ar: 'الدقة، التنافسية', en: 'Accuracy, competitiveness' }, weight: 10 },
+                        { id: 'delivery_deadlines', name: { ar: 'الالتزام بمواعيد التسليم', en: 'Adherence to Delivery Deadlines' }, weight: 10 }
                     ]
                 },
 
@@ -2787,26 +2422,26 @@
                     criteria: {
                         forklift_drivers: [
                             { id: 'driver_experience', name: { ar: 'خبرة السائق', en: 'Driver Experience' },
-                              description: { ar: 'المهارة، الأمان', en: 'Skill, safety' }, weight: 9 },
+                              description: { ar: 'المهارة، الأمان', en: 'Skill, safety' }, weight: 10 },
                             { id: 'periodic_maintenance', name: { ar: 'الصيانة الدورية', en: 'Periodic Maintenance' },
-                              description: { ar: 'الالتزام، الإبلاغ', en: 'Commitment, reporting' }, weight: 7 },
-                            { id: 'forklift_cleanliness', name: { ar: 'النظافة العامة للفوركليفت', en: 'Forklift General Cleanliness' }, weight: 6 },
+                              description: { ar: 'الالتزام، الإبلاغ', en: 'Commitment, reporting' }, weight: 10 },
+                            { id: 'forklift_cleanliness', name: { ar: 'النظافة العامة للفوركليفت', en: 'Forklift General Cleanliness' }, weight: 10 },
                             { id: 'driving_experience', name: { ar: 'الخبرة في القيادة', en: 'Driving Experience' },
-                              description: { ar: 'الداخلية، المناورة', en: 'Indoors, maneuvering' }, weight: 8 },
+                              description: { ar: 'الداخلية، المناورة', en: 'Indoors, maneuvering' }, weight: 10 },
                             { id: 'loading_experience', name: { ar: 'خبرة التحميل والتنزيل', en: 'Loading and Unloading Experience' },
-                              description: { ar: 'الكفاءة، السلامة', en: 'Efficiency, safety' }, weight: 8 },
-                            { id: 'safety_procedures', name: { ar: 'الالتزام بإجراءات السلامة', en: 'Adherence to Safety Procedures' }, weight: 7 }
+                              description: { ar: 'الكفاءة، السلامة', en: 'Efficiency, safety' }, weight: 10 },
+                            { id: 'safety_procedures', name: { ar: 'الالتزام بإجراءات السلامة', en: 'Adherence to Safety Procedures' }, weight: 10 }
                         ],
                         shipping_drivers: [
                             { id: 'vehicle_maintenance', name: { ar: 'المحافظة على السيارة', en: 'Vehicle Maintenance' },
-                              description: { ar: 'العناية، النظافة', en: 'Care, cleanliness' }, weight: 8 },
-                            { id: 'cleanliness', name: { ar: 'النظافة الداخلية والخارجية', en: 'Internal and External Cleanliness' }, weight: 6 },
-                            { id: 'work_speed', name: { ar: 'سرعة إتمام العمل الموكل', en: 'Work Completion Speed' }, weight: 7 },
-                            { id: 'crane_experience', name: { ar: 'خبرة استخدام الكرين (رافعة الباليت)', en: 'Crane (Pallet Jack) Experience' }, weight: 8 },
-                            { id: 'maintenance_schedule', name: { ar: 'الالتزام بمواعيد الصيانة', en: 'Adherence to Maintenance Schedule' }, weight: 7 },
-                            { id: 'fault_reporting', name: { ar: 'الإبلاغ عن الأعطال فوراً', en: 'Immediate Fault Reporting' }, weight: 7 },
-                            { id: 'daily_check', name: { ar: 'الصيانة الدورية والفحص اليومي', en: 'Periodic Maintenance and Daily Check' }, weight: 7 },
-                            { id: 'traffic_rules', name: { ar: 'الالتزام بقواعد المرور وتجنب المخالفات', en: 'Adherence to Traffic Rules and Avoiding Violations' }, weight: 8 }
+                              description: { ar: 'العناية، النظافة', en: 'Care, cleanliness' }, weight: 10 },
+                            { id: 'cleanliness', name: { ar: 'النظافة الداخلية والخارجية', en: 'Internal and External Cleanliness' }, weight: 10 },
+                            { id: 'work_speed', name: { ar: 'سرعة إتمام العمل الموكل', en: 'Work Completion Speed' }, weight: 10 },
+                            { id: 'crane_experience', name: { ar: 'خبرة استخدام الكرين (رافعة الباليت)', en: 'Crane (Pallet Jack) Experience' }, weight: 10 },
+                            { id: 'maintenance_schedule', name: { ar: 'الالتزام بمواعيد الصيانة', en: 'Adherence to Maintenance Schedule' }, weight: 10 },
+                            { id: 'fault_reporting', name: { ar: 'الإبلاغ عن الأعطال فوراً', en: 'Immediate Fault Reporting' }, weight: 10 },
+                            { id: 'daily_check', name: { ar: 'الصيانة الدورية والفحص اليومي', en: 'Periodic Maintenance and Daily Check' }, weight: 10 },
+                            { id: 'traffic_rules', name: { ar: 'الالتزام بقواعد المرور وتجنب المخالفات', en: 'Adherence to Traffic Rules and Avoiding Violations' }, weight: 10 }
                         ]
                     }
                 },
@@ -2825,108 +2460,108 @@
                         { id: 'accounting_accuracy', name: { ar: 'الدقة المحاسبية', en: 'Accounting Accuracy' },
                           description: { ar: 'إدخال البيانات، اكتشاف الأخطاء', en: 'Data entry, error detection' }, weight: 10 },
                         { id: 'timeliness', name: { ar: 'الالتزام بالمواعيد', en: 'Timeliness' },
-                          description: { ar: 'التقارير، المدفوعات', en: 'Reports, payments' }, weight: 9 },
+                          description: { ar: 'التقارير، المدفوعات', en: 'Reports, payments' }, weight: 10 },
                         { id: 'confidentiality', name: { ar: 'السرية والأمانة', en: 'Confidentiality and Integrity' },
-                          description: { ar: 'حفظ الأسرار، الإبلاغ عن المخالفات', en: 'Keeping secrets, reporting violations' }, weight: 9 },
+                          description: { ar: 'حفظ الأسرار، الإبلاغ عن المخالفات', en: 'Keeping secrets, reporting violations' }, weight: 10 },
                         { id: 'organization', name: { ar: 'التنظيم', en: 'Organization' },
-                          description: { ar: 'السجلات، الأرشفة', en: 'Records, archiving' }, weight: 8 },
-                        { id: 'accounting_standards', name: { ar: 'الالتزام بالمعايير المحاسبية', en: 'Adherence to Accounting Standards' }, weight: 8 },
-                        { id: 'task_completion', name: { ar: 'إنجاز المهام المالية في الوقت', en: 'Timely Financial Task Completion' }, weight: 7 },
-                        { id: 'information_confidentiality', name: { ar: 'حفظ سرية المعلومات المالية', en: 'Confidentiality of Financial Information' }, weight: 7 },
-                        { id: 'records_organization', name: { ar: 'تنظيم السجلات والمستندات', en: 'Organization of Records and Documents' }, weight: 7 }
+                          description: { ar: 'السجلات، الأرشفة', en: 'Records, archiving' }, weight: 10 },
+                        { id: 'accounting_standards', name: { ar: 'الالتزام بالمعايير المحاسبية', en: 'Adherence to Accounting Standards' }, weight: 10 },
+                        { id: 'task_completion', name: { ar: 'إنجاز المهام المالية في الوقت', en: 'Timely Financial Task Completion' }, weight: 10 },
+                        { id: 'information_confidentiality', name: { ar: 'حفظ سرية المعلومات المالية', en: 'Confidentiality of Financial Information' }, weight: 10 },
+                        { id: 'records_organization', name: { ar: 'تنظيم السجلات والمستندات', en: 'Organization of Records and Documents' }, weight: 10 }
                     ]
                 },
 
                 marketing: {
-    name: { ar: '📱 قسم التسويق الإلكتروني والسوشيال ميديا', en: '📱 Digital Marketing and Social Media Department' },
-    manager: 'أمين أحمد حجازي',
-    teams: {
-        photographer: {
-            name: { ar: 'فريق التصوير', en: 'Photography Team' },
-            supervisor: 'أمين أحمد حجازي',
-            employees: [
-                {
-                    id: 'ammar',
-                    name: 'عمار فادي عوض',
-                    position: { ar: 'مصور', en: 'Photographer' }
-                }
-            ],
-            criteria: [
-                { id: 'photo_quality', name: { ar: 'جودة التصوير', en: 'Photo Quality' }, weight: 8 },
-                { id: 'content_creativity', name: { ar: 'التنوع والإبداع في المحتوى', en: 'Content Variety and Creativity' }, weight: 7 },
-                { id: 'production_speed', name: { ar: 'سرعة الإنتاج', en: 'Production Speed' }, weight: 7 },
-                { id: 'coordination', name: { ar: 'التنسيق مع فريق المونتاج والتسويق', en: 'Coordination with Editing and Marketing Team' }, weight: 6 },
-                { id: 'peak_hours', name: { ar: 'التواجد المستمر في اوقات الذروة', en: 'Continuous Presence During Peak Hours' }, weight: 6 }
-            ]
-        },
+                    name: { ar: '📱 قسم التسويق الإلكتروني والسوشيال ميديا', en: '📱 Digital Marketing and Social Media Department' },
+                    manager: 'أمين أحمد حجازي',
+                    teams: {
+                        photographer: {
+                            name: { ar: 'فريق التصوير', en: 'Photography Team' },
+                            supervisor: 'أمين أحمد حجازي',
+                            employees: [
+                                {
+                                    id: 'ammar',
+                                    name: 'عمار فادي عوض',
+                                    position: { ar: 'مصور', en: 'Photographer' }
+                                }
+                            ],
+                            criteria: [
+                                { id: 'photo_quality', name: { ar: 'جودة التصوير', en: 'Photo Quality' }, weight: 10 },
+                                { id: 'content_creativity', name: { ar: 'التنوع والإبداع في المحتوى', en: 'Content Variety and Creativity' }, weight: 10 },
+                                { id: 'production_speed', name: { ar: 'سرعة الإنتاج', en: 'Production Speed' }, weight: 10 },
+                                { id: 'coordination', name: { ar: 'التنسيق مع فريق المونتاج والتسويق', en: 'Coordination with Editing and Marketing Team' }, weight: 10 },
+                                { id: 'peak_hours', name: { ar: 'التواجد المستمر في اوقات الذروة', en: 'Continuous Presence During Peak Hours' }, weight: 10 }
+                            ]
+                        },
 
-        editor: {
-            name: { ar: 'فريق المونتاج', en: 'Editing Team' },
-            supervisor: 'أمين أحمد حجازي',
-            employees: [
-                {
-                    id: 'samer',
-                    name: 'سامر جنيد',
-                    position: { ar: 'مونتاج', en: 'Video Editor' }
-                }
-            ],
-            criteria: [
-                {
-                    id: 'editing_quality',
-                    name: { ar: 'جودة المونتاج', en: 'Editing Quality' },
-                    description: { ar: 'التصاميم والإعلانات', en: 'Designs and advertisements' },
-                    weight: 8
+                        editor: {
+                            name: { ar: 'فريق المونتاج', en: 'Editing Team' },
+                            supervisor: 'أمين أحمد حجازي',
+                            employees: [
+                                {
+                                    id: 'samer',
+                                    name: 'سامر جنيد',
+                                    position: { ar: 'مونتاج', en: 'Video Editor' }
+                                }
+                            ],
+                            criteria: [
+                                {
+                                    id: 'editing_quality',
+                                    name: { ar: 'جودة المونتاج', en: 'Editing Quality' },
+                                    description: { ar: 'التصاميم والإعلانات', en: 'Designs and advertisements' },
+                                    weight: 10
+                                },
+                                { id: 'delivery_speed', name: { ar: 'سرعة التسليم', en: 'Delivery Speed' }, weight: 10 },
+                                { id: 'editing_creativity', name: { ar: 'الإبداع في التحرير', en: 'Creativity in Editing' }, weight: 10 },
+                                { id: 'visual_identity', name: { ar: 'الالتزام بالهوية البصرية', en: 'Adherence to Visual Identity' }, weight: 10 }
+                            ]
+                        },
+
+                        designer: {
+                            name: { ar: 'فريق التصميم والإعلانات', en: 'Design and Advertising Team' },
+                            supervisor: 'أمين أحمد حجازي',
+                            employees: [
+                                {
+                                    id: 'rabah',
+                                    name: 'رباح الحموي',
+                                    position: { ar: 'مصمم إعلان/ناشر/متفاعل', en: 'Ad Designer/Publisher/Engager' }
+                                }
+                            ],
+                            criteria: [
+                                { id: 'campaign_management', name: { ar: 'إدارة الحملات الإعلانية المدفوعة', en: 'Paid Advertising Campaign Management' }, weight: 10 },
+                                { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 10 },
+                                { id: 'publishing_schedule', name: { ar: 'الالتزام بجدول النشر في أوقات الذروة', en: 'Publishing Schedule and Timeliness' }, weight: 10 },
+                                { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 10 },
+                                { id: 'page_coordination', name: { ar: 'تنسيق الصفحات والمحتوى', en: 'Page and Publication Coordination' }, weight: 10 }
+                            ]
+                        },
+
+                        social_media: {
+                            name: { ar: 'فريق السوشيال ميديا', en: 'Social Media Team' },
+                            supervisor: 'أمين أحمد حجازي',
+                            employees: [
+                                {
+                                    id: 'menna_allah',
+                                    name: 'منه الله علاء',
+                                    position: { ar: 'سوشيال ميديا', en: 'Social Media Specialist' }
+                                },
+                                {
+                                    id: 'rania',
+                                    name: 'رانيا فريد',
+                                    position: { ar: 'سوشيال ميديا', en: 'Social Media Specialist' }
+                                }
+                            ],
+                            criteria: [
+                                { id: 'campaign_management', name: { ar: 'مستوى المعلومات عن الدولة وكيفية الرد والتعامل مع شعبها', en: 'Paid Advertising Campaign Management' }, weight: 10 },
+                                { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 10 },
+                                { id: 'publishing_schedule', name: { ar: 'مدى الجاهزيه بأوقات الذروة و العروض والضغط', en: 'Publishing Schedule and Timeliness' }, weight: 10 },
+                                { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 10 },
+                                { id: 'page_coordination', name: { ar: 'مستوى معلوماتهم و خبرتهم في مجال أعمال الشركة', en: 'Page and Publication Coordination' }, weight: 10 }
+                            ]
+                        }
+                    }
                 },
-                { id: 'delivery_speed', name: { ar: 'سرعة التسليم', en: 'Delivery Speed' }, weight: 7 },
-                { id: 'editing_creativity', name: { ar: 'الإبداع في التحرير', en: 'Creativity in Editing' }, weight: 7 },
-                { id: 'visual_identity', name: { ar: 'الالتزام بالهوية البصرية', en: 'Adherence to Visual Identity' }, weight: 6 }
-            ]
-        },
-
-        designer: {
-            name: { ar: 'فريق التصميم والإعلانات', en: 'Design and Advertising Team' },
-            supervisor: 'أمين أحمد حجازي',
-            employees: [
-                {
-                    id: 'rabah',
-                    name: 'رباح الحموي',
-                    position: { ar: 'مصمم إعلان/ناشر/متفاعل', en: 'Ad Designer/Publisher/Engager' }
-                }
-            ],
-            criteria: [
-                { id: 'campaign_management', name: { ar: 'إدارة الحملات الإعلانية المدفوعة', en: 'Paid Advertising Campaign Management' }, weight: 7 },
-                { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 8 },
-                { id: 'publishing_schedule', name: { ar: 'الالتزام بجدول النشر في أوقات الذروة', en: 'Publishing Schedule and Timeliness' }, weight: 7 },
-                { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 7 },
-                { id: 'page_coordination', name: { ar: 'تنسيق الصفحات والمحتوى', en: 'Page and Publication Coordination' }, weight: 6 }
-            ]
-        },
-
-        social_media: {
-            name: { ar: 'فريق السوشيال ميديا', en: 'Social Media Team' },
-            supervisor: 'أمين أحمد حجازي',
-            employees: [
-                {
-                    id: 'menna_allah',
-                    name: 'منه الله علاء',
-                    position: { ar: 'سوشيال ميديا', en: 'Social Media Specialist' }
-                },
-                {
-                    id: 'rania',
-                    name: 'رانيا فريد',
-                    position: { ar: 'سوشيال ميديا', en: 'Social Media Specialist' }
-                }
-            ],
-            criteria: [
-                { id: 'campaign_management', name: { ar: 'مستوى المعلومات عن الدولة وكيفية الرد والتعامل مع شعبها', en: 'Paid Advertising Campaign Management' }, weight: 7 },
-                { id: 'interaction', name: { ar: 'التفاعل مع المتابعين والرد على الرسائل', en: 'Interaction with Followers and Message Response' }, weight: 8 },
-                { id: 'publishing_schedule', name: { ar: 'مدى الجاهزيه بأوقات الذروة و العروض والضغط', en: 'Publishing Schedule and Timeliness' }, weight: 7 },
-                { id: 'off_hours_response', name: { ar: 'الرد خارج اوقات الدوام', en: 'Response Outside Working Hours' }, weight: 7 },
-                { id: 'page_coordination', name: { ar: 'مستوى معلوماتهم و خبرتهم في مجال أعمال الشركة', en: 'Page and Publication Coordination' }, weight: 6 }
-            ]
-        }
-    }
-},
 
                 projects: {
                     name: { ar: '🔨 قسم المشاريع', en: '🔨 Projects Department' },
@@ -2981,25 +2616,25 @@
                     },
                     criteria: {
                         foremen: [
-                            { id: 'instructions_accuracy', name: { ar: 'تنفيذ التعليمات بدقة', en: 'Accurate Execution of Instructions' }, weight: 9 },
+                            { id: 'instructions_accuracy', name: { ar: 'تنفيذ التعليمات بدقة', en: 'Accurate Execution of Instructions' }, weight: 10 },
                             { id: 'measurements', name: { ar: 'المقاسات وشد الخيوط', en: 'Measurements and String Tension' },
-                              description: { ar: 'الدقة', en: 'Accuracy' }, weight: 8 },
-                            { id: 'defect_detection', name: { ar: 'عزل الحجر السيئ واكتشاف العيوب', en: 'Isolation of Bad Stone and Defect Detection' }, weight: 8 },
-                            { id: 'stone_arrangement', name: { ar: 'ترتيب الحجر في الموقع', en: 'Stone Arrangement on Site' }, weight: 7 },
-                            { id: 'finishing_quality', name: { ar: 'جودة التشطيب النهائي', en: 'Final Finishing Quality' }, weight: 8 },
-                            { id: 'decor_arrangement', name: { ar: 'ترتيب الديكورات والإكسسوارات', en: 'Decoration and Accessories Arrangement' }, weight: 6 },
-                            { id: 'scaffolding_safety', name: { ar: 'تركيب السقالات بأمان', en: 'Safe Scaffolding Installation' }, weight: 7 },
-                            { id: 'installation_speed', name: { ar: 'سرعة التركيب مع الحفاظ على الجودة', en: 'Installation Speed with Quality Maintenance' }, weight: 7 },
-                            { id: 'overtime', name: { ar: 'الاستعداد للعمل الإضافي', en: 'Willingness for Overtime Work' }, weight: 6 },
-                            { id: 'daily_tasks', name: { ar: 'الإنجاز اليومي للمهام', en: 'Daily Task Completion' }, weight: 7 }
+                              description: { ar: 'الدقة', en: 'Accuracy' }, weight: 10 },
+                            { id: 'defect_detection', name: { ar: 'عزل الحجر السيئ واكتشاف العيوب', en: 'Isolation of Bad Stone and Defect Detection' }, weight: 10 },
+                            { id: 'stone_arrangement', name: { ar: 'ترتيب الحجر في الموقع', en: 'Stone Arrangement on Site' }, weight: 10 },
+                            { id: 'finishing_quality', name: { ar: 'جودة التشطيب النهائي', en: 'Final Finishing Quality' }, weight: 10 },
+                            { id: 'decor_arrangement', name: { ar: 'ترتيب الديكورات والإكسسوارات', en: 'Decoration and Accessories Arrangement' }, weight: 10 },
+                            { id: 'scaffolding_safety', name: { ar: 'تركيب السقالات بأمان', en: 'Safe Scaffolding Installation' }, weight: 10 },
+                            { id: 'installation_speed', name: { ar: 'سرعة التركيب مع الحفاظ على الجودة', en: 'Installation Speed with Quality Maintenance' }, weight: 10 },
+                            { id: 'overtime', name: { ar: 'الاستعداد للعمل الإضافي', en: 'Willingness for Overtime Work' }, weight: 10 },
+                            { id: 'daily_tasks', name: { ar: 'الإنجاز اليومي للمهام', en: 'Daily Task Completion' }, weight: 10 }
                         ],
                         project_workers: [
-                            { id: 'instructions_following', name: { ar: 'تنفيذ التعليمات بدقة', en: 'Accurate Following of Instructions' }, weight: 8 },
-                            { id: 'measurements_compliance', name: { ar: 'الالتزام بالمقاسات المطلوبة', en: 'Compliance with Required Measurements' }, weight: 8 },
-                            { id: 'defect_isolation', name: { ar: 'اكتشاف وعزل الحجر المعيب', en: 'Detection and Isolation of Defective Stone' }, weight: 7 },
-                            { id: 'workplace_organization', name: { ar: 'ترتيب مكان العمل', en: 'Workplace Organization' }, weight: 6 },
-                            { id: 'safety_procedures', name: { ar: 'الالتزام بإجراءات السلامة', en: 'Adherence to Safety Procedures' }, weight: 7 },
-                            { id: 'task_speed', name: { ar: 'سرعة إنجاز المهام', en: 'Task Completion Speed' }, weight: 7 }
+                            { id: 'instructions_following', name: { ar: 'تنفيذ التعليمات بدقة', en: 'Accurate Following of Instructions' }, weight: 10 },
+                            { id: 'measurements_compliance', name: { ar: 'الالتزام بالمقاسات المطلوبة', en: 'Compliance with Required Measurements' }, weight: 10 },
+                            { id: 'defect_isolation', name: { ar: 'اكتشاف وعزل الحجر المعيب', en: 'Detection and Isolation of Defective Stone' }, weight: 10 },
+                            { id: 'workplace_organization', name: { ar: 'ترتيب مكان العمل', en: 'Workplace Organization' }, weight: 10 },
+                            { id: 'safety_procedures', name: { ar: 'الالتزام بإجراءات السلامة', en: 'Adherence to Safety Procedures' }, weight: 10 },
+                            { id: 'task_speed', name: { ar: 'سرعة إنجاز المهام', en: 'Task Completion Speed' }, weight: 10 }
                         ]
                     }
                 },
@@ -3043,39 +2678,39 @@
                     },
                     criteria: {
                         project_workers: [
-                            { id: 'instructions_execution', name: { ar: 'تنفيذ التعليمات بدقة', en: 'Accurate Execution of Instructions' }, weight: 8 },
-                            { id: 'measurements_accuracy', name: { ar: 'الدقة في المقاسات وشد الخيوط', en: 'Accuracy in Measurements and String Tension' }, weight: 8 },
-                            { id: 'stone_defect', name: { ar: 'عزل الحجر السيئ واكتشاف العيوب', en: 'Isolation of Bad Stone and Defect Detection' }, weight: 7 },
-                            { id: 'stone_arrangement', name: { ar: 'ترتيب الحجر في الموقع', en: 'Stone Arrangement on Site' }, weight: 6 },
-                            { id: 'work_safety', name: { ar: 'السلامة في العمل', en: 'Work Safety' }, weight: 7 },
-                            { id: 'work_speed', name: { ar: 'سرعة الإنجاز', en: 'Work Speed' }, weight: 7 },
-                            { id: 'material_preservation', name: { ar: 'المحافظة على المواد وتقليل الهدر', en: 'Material Preservation and Waste Reduction' }, weight: 7 }
+                            { id: 'instructions_execution', name: { ar: 'تنفيذ التعليمات بدقة', en: 'Accurate Execution of Instructions' }, weight: 10 },
+                            { id: 'measurements_accuracy', name: { ar: 'الدقة في المقاسات وشد الخيوط', en: 'Accuracy in Measurements and String Tension' }, weight: 10 },
+                            { id: 'stone_defect', name: { ar: 'عزل الحجر السيئ واكتشاف العيوب', en: 'Isolation of Bad Stone and Defect Detection' }, weight: 10 },
+                            { id: 'stone_arrangement', name: { ar: 'ترتيب الحجر في الموقع', en: 'Stone Arrangement on Site' }, weight: 10 },
+                            { id: 'work_safety', name: { ar: 'السلامة في العمل', en: 'Work Safety' }, weight: 10 },
+                            { id: 'work_speed', name: { ar: 'سرعة الإنجاز', en: 'Work Speed' }, weight: 10 },
+                            { id: 'material_preservation', name: { ar: 'المحافظة على المواد وتقليل الهدر', en: 'Material Preservation and Waste Reduction' }, weight: 10 }
                         ],
                         cutting_workers: [
-                            { id: 'cutting_accuracy', name: { ar: 'دقة القص حسب المقاسات', en: 'Cutting Accuracy According to Measurements' }, weight: 9 },
-                            { id: 'waste_reduction', name: { ar: 'تقليل الهدر في المواد', en: 'Material Waste Reduction' }, weight: 8 },
-                            { id: 'machine_safety', name: { ar: 'سلامة تشغيل آلات القص', en: 'Cutting Machine Operation Safety' }, weight: 8 },
-                            { id: 'edge_quality', name: { ar: 'جودة الحواف ونظافتها', en: 'Edge Quality and Cleanliness' }, weight: 7 },
-                            { id: 'machine_maintenance', name: { ar: 'الصيانة البسيطة للآلات', en: 'Basic Machine Maintenance' }, weight: 6 },
-                            { id: 'productivity', name: { ar: 'الإنتاجية وجودة القطع', en: 'Productivity and Cutting Quality' }, weight: 7 }
+                            { id: 'cutting_accuracy', name: { ar: 'دقة القص حسب المقاسات', en: 'Cutting Accuracy According to Measurements' }, weight: 10 },
+                            { id: 'waste_reduction', name: { ar: 'تقليل الهدر في المواد', en: 'Material Waste Reduction' }, weight: 10 },
+                            { id: 'machine_safety', name: { ar: 'سلامة تشغيل آلات القص', en: 'Cutting Machine Operation Safety' }, weight: 10 },
+                            { id: 'edge_quality', name: { ar: 'جودة الحواف ونظافتها', en: 'Edge Quality and Cleanliness' }, weight: 10 },
+                            { id: 'machine_maintenance', name: { ar: 'الصيانة البسيطة للآلات', en: 'Basic Machine Maintenance' }, weight: 10 },
+                            { id: 'productivity', name: { ar: 'الإنتاجية وجودة القطع', en: 'Productivity and Cutting Quality' }, weight: 10 }
                         ],
                         installation_workers: [
-                            { id: 'installation_accuracy', name: { ar: 'دقة التركيب حسب التصميم', en: 'Installation Accuracy According to Design' }, weight: 9 },
-                            { id: 'installation_speed', name: { ar: 'سرعة التركيب مع الحفاظ على الجودة', en: 'Installation Speed with Quality Maintenance' }, weight: 8 },
-                            { id: 'installation_alignment', name: { ar: 'تنسيق واستواء التركيب', en: 'Installation Alignment and Levelness' }, weight: 7 },
-                            { id: 'tool_skills', name: { ar: 'مهارة استخدام أدوات التركيب', en: 'Installation Tool Skills' }, weight: 7 },
-                            { id: 'cleaning', name: { ar: 'تنظيف المكان بعد التركيب', en: 'Cleaning After Installation' }, weight: 6 },
-                            { id: 'professionalism', name: { ar: 'الاحترافية في التعامل في مواقع العملاء', en: 'Professionalism in Customer Sites' }, weight: 7 }
+                            { id: 'installation_accuracy', name: { ar: 'دقة التركيب حسب التصميم', en: 'Installation Accuracy According to Design' }, weight: 10 },
+                            { id: 'installation_speed', name: { ar: 'سرعة التركيب مع الحفاظ على الجودة', en: 'Installation Speed with Quality Maintenance' }, weight: 10 },
+                            { id: 'installation_alignment', name: { ar: 'تنسيق واستواء التركيب', en: 'Installation Alignment and Levelness' }, weight: 10 },
+                            { id: 'tool_skills', name: { ar: 'مهارة استخدام أدوات التركيب', en: 'Installation Tool Skills' }, weight: 10 },
+                            { id: 'cleaning', name: { ar: 'تنظيف المكان بعد التركيب', en: 'Cleaning After Installation' }, weight: 10 },
+                            { id: 'professionalism', name: { ar: 'الاحترافية في التعامل في مواقع العملاء', en: 'Professionalism in Customer Sites' }, weight: 10 }
                         ],
                         finishing_workers: [
                             { id: 'finishing_quality', name: { ar: 'جودة التشطيب النهائي', en: 'Final Finishing Quality' },
-                              description: { ar: 'صقل، تلميع', en: 'Polishing, buffing' }, weight: 9 },
-                            { id: 'attention_detail', name: { ar: 'الاهتمام بالتفاصيل الدقيقة', en: 'Attention to Fine Details' }, weight: 8 },
-                            { id: 'treatment_quality', name: { ar: 'جودة المعالجات النهائية', en: 'Final Treatment Quality' }, weight: 7 },
-                            { id: 'safety_materials', name: { ar: 'التعامل الآمن مع مواد التشطيب', en: 'Safe Handling of Finishing Materials' }, weight: 7 },
-                            { id: 'surface_protection', name: { ar: 'الحفاظ على السطح من الخدوش', en: 'Surface Protection from Scratches' }, weight: 6 },
-                            { id: 'finishing_speed', name: { ar: 'سرعة إنجاز التشطيب', en: 'Finishing Completion Speed' }, weight: 7 },
-                            { id: 'final_inspection', name: { ar: 'الفحص النهائي للجودة', en: 'Final Quality Inspection' }, weight: 7 }
+                              description: { ar: 'صقل، تلميع', en: 'Polishing, buffing' }, weight: 10 },
+                            { id: 'attention_detail', name: { ar: 'الاهتمام بالتفاصيل الدقيقة', en: 'Attention to Fine Details' }, weight: 10 },
+                            { id: 'treatment_quality', name: { ar: 'جودة المعالجات النهائية', en: 'Final Treatment Quality' }, weight: 10 },
+                            { id: 'safety_materials', name: { ar: 'التعامل الآمن مع مواد التشطيب', en: 'Safe Handling of Finishing Materials' }, weight: 10 },
+                            { id: 'surface_protection', name: { ar: 'الحفاظ على السطح من الخدوش', en: 'Surface Protection from Scratches' }, weight: 10 },
+                            { id: 'finishing_speed', name: { ar: 'سرعة إنجاز التشطيب', en: 'Finishing Completion Speed' }, weight: 10 },
+                            { id: 'final_inspection', name: { ar: 'الفحص النهائي للجودة', en: 'Final Quality Inspection' }, weight: 10 }
                         ]
                     }
                 }
@@ -3166,28 +2801,6 @@
                     instructionAutoSendTitle: document.getElementById('instructionAutoSendTitle'),
                     instructionAutoSendText: document.getElementById('instructionAutoSendText'),
 
-                    // Rating Scale
-                    ratingScaleTitle: document.getElementById('ratingScaleTitle'),
-                    rating5Label: document.getElementById('rating5Label'),
-                    rating4Label: document.getElementById('rating4Label'),
-                    rating3Label: document.getElementById('rating3Label'),
-                    rating2Label: document.getElementById('rating2Label'),
-                    rating1Label: document.getElementById('rating1Label'),
-
-                    // Calculator
-                    calculatorTitle: document.getElementById('calculatorTitle'),
-                    calculatorFormula: document.getElementById('calculatorFormula'),
-                    formulaTitle: document.getElementById('formulaTitle'),
-                    formulaText: document.getElementById('formulaText'),
-                    exampleTitle: document.getElementById('exampleTitle'),
-                    exampleText: document.getElementById('exampleText'),
-                    noteTitle: document.getElementById('noteTitle'),
-                    noteText: document.getElementById('noteText'),
-                    explanationTitle: document.getElementById('explanationTitle'),
-                    explanationText: document.getElementById('explanationText'),
-                    totalPointsTitle: document.getElementById('totalPointsTitle'),
-                    totalPointsText: document.getElementById('totalPointsText'),
-
                     // Settings
                     settingsTitle: document.getElementById('settingsTitle'),
                     departmentLabel: document.getElementById('departmentLabel'),
@@ -3195,6 +2808,13 @@
                     supervisorLabel: document.getElementById('supervisorLabel'),
                     dateLabel: document.getElementById('dateLabel'),
                     generateButtonText: document.getElementById('generateButtonText'),
+
+                    // Departments
+                    departmentSelect: document.getElementById('departmentSelect'),
+                    employeeSelect: document.getElementById('employeeSelect'),
+                    supervisorSelect: document.getElementById('supervisorSelect'),
+                    evaluationDate: document.getElementById('evaluationDate'),
+                    generateBtn: document.getElementById('generateAndSend'),
 
                     // Notes
                     notesTitle: document.getElementById('notesTitle'),
@@ -3233,53 +2853,6 @@
                     totalScoreLabel: document.getElementById('totalScoreLabel'),
 
                     // Print
-                    printReportTitle: document.getElementById('printReportTitle'),
-                    printInfoTitle: document.getElementById('printInfoTitle'),
-                    printEmployeeLabel: document.getElementById('printEmployeeLabel'),
-                    printDepartmentLabel: document.getElementById('printDepartmentLabel'),
-                    printSupervisorLabel: document.getElementById('printSupervisorLabel'),
-                    printDateLabel: document.getElementById('printDateLabel'),
-                    printTotalScoreLabel: document.getElementById('printTotalScoreLabel'),
-                    printGradeLabel: document.getElementById('printGradeLabel'),
-
-                    // Signatures
-                    signaturesTitle: document.getElementById('signaturesTitle'),
-                    employeeSignatureTitle: document.getElementById('employeeSignatureTitle'),
-                    supervisorSignatureTitle: document.getElementById('supervisorSignatureTitle'),
-                    hrSignatureTitle: document.getElementById('hrSignatureTitle'),
-
-                    // Footer
-                    copyrightText: document.getElementById('copyrightText'),
-                    privacyLink: document.getElementById('privacyLink'),
-                    termsLink: document.getElementById('termsLink'),
-                    contactLink: document.getElementById('contactLink'),
-                    supportLink: document.getElementById('supportLink'),
-
-                    // Form elements
-                    departmentSelect: document.getElementById('departmentSelect'),
-                    employeeSelect: document.getElementById('employeeSelect'),
-                    supervisorSelect: document.getElementById('supervisorSelect'),
-                    evaluationDate: document.getElementById('evaluationDate'),
-                    generateBtn: document.getElementById('generateAndSend'),
-                    notification: document.getElementById('notification'),
-                    notificationTitle: document.getElementById('notificationTitle'),
-                    notificationMessage: document.getElementById('notificationMessage'),
-                    notificationClose: document.querySelector('.notification-close'),
-                    generalCriteriaBody: document.getElementById('generalCriteriaBody'),
-                    departmentCriteria: document.getElementById('departmentCriteria'),
-                    generalScore: document.getElementById('generalScore'),
-                    departmentScore: document.getElementById('departmentScore'),
-                    summaryCard: document.getElementById('summaryCard'),
-                    summaryGeneral: document.getElementById('summaryGeneral'),
-                    summaryDepartment: document.getElementById('summaryDepartment'),
-                    summaryPercentage: document.getElementById('summaryPercentage'),
-                    summaryGrade: document.getElementById('summaryGrade'),
-                    summaryMessage: document.getElementById('summaryMessage'),
-                    finalScore: document.getElementById('finalScore'),
-                    scoreGrade: document.getElementById('scoreGrade'),
-                    performanceTips: document.getElementById('performanceTips'),
-                    scoreProgress: document.getElementById('scoreProgress'),
-                    totalScoreDisplay: document.getElementById('totalScoreDisplay'),
                     printReportHeader: document.getElementById('printReportHeader'),
                     printEmployeeInfo: document.getElementById('printEmployeeInfo'),
                     printDepartmentInfo: document.getElementById('printDepartmentInfo'),
@@ -3287,12 +2860,41 @@
                     printDateInfo: document.getElementById('printDateInfo'),
                     printTotalScore: document.getElementById('printTotalScore'),
                     printGradeInfo: document.getElementById('printGradeInfo'),
+
+                    // Signatures
                     printSignatures: document.getElementById('printSignatures'),
                     printEmployeeSignature: document.getElementById('printEmployeeSignature'),
                     printSupervisorSignature: document.getElementById('printSupervisorSignature'),
                     printSignatureDate1: document.getElementById('printSignatureDate1'),
                     printSignatureDate2: document.getElementById('printSignatureDate2'),
-                    printSignatureDate3: document.getElementById('printSignatureDate3')
+                    printSignatureDate3: document.getElementById('printSignatureDate3'),
+
+                    // Notification
+                    notification: document.getElementById('notification'),
+                    notificationTitle: document.getElementById('notificationTitle'),
+                    notificationMessage: document.getElementById('notificationMessage'),
+                    notificationClose: document.querySelector('.notification-close'),
+
+                    // Table Elements
+                    generalCriteriaBody: document.getElementById('generalCriteriaBody'),
+                    departmentCriteria: document.getElementById('departmentCriteria'),
+                    generalScore: document.getElementById('generalScore'),
+                    departmentScore: document.getElementById('departmentScore'),
+                    
+                    // Summary Elements
+                    summaryCard: document.getElementById('summaryCard'),
+                    summaryGeneral: document.getElementById('summaryGeneral'),
+                    summaryDepartment: document.getElementById('summaryDepartment'),
+                    summaryPercentage: document.getElementById('summaryPercentage'),
+                    summaryGrade: document.getElementById('summaryGrade'),
+                    summaryMessage: document.getElementById('summaryMessage'),
+                    
+                    // Total Score Elements
+                    finalScore: document.getElementById('finalScore'),
+                    scoreGrade: document.getElementById('scoreGrade'),
+                    performanceTips: document.getElementById('performanceTips'),
+                    scoreProgress: document.getElementById('scoreProgress'),
+                    totalScoreDisplay: document.getElementById('totalScoreDisplay')
                 };
             }
 
@@ -3347,6 +2949,7 @@
 
                 // إضافة مستمع لحدث الطباعة
                 window.addEventListener('beforeprint', () => this.prepareForPrint());
+                window.addEventListener('afterprint', () => this.cleanupAfterPrint());
             }
 
             switchLanguage() {
@@ -3553,14 +3156,14 @@
                             <td colspan="5" style="text-align: center; padding: 40px; color: var(--gray-color);">
                                 <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 15px;"></i>
                                 <h3>${lang === 'ar' ? 'لا توجد معايير مخصصة لهذا الموظف' : 'No specific criteria for this employee'}</h3>
-                                <p>${lang === 'ar' ? 'يرجى التواصل مع إدارة الموارد البشرية0561101262' : 'Please contact Human Resources Department'}</p>
+                                <p>${lang === 'ar' ? 'يرجى التواصل مع إدارة الموارد البشرية' : 'Please contact Human Resources Department'}</p>
                             </td>
                         </tr>
                     `;
                 } else {
                     criteria.forEach(criterion => {
                         const rating = this.state.ratings.department.get(criterion.id) || 0;
-                        const calculated = rating > 0 ? (rating / 5) * criterion.weight : 0;
+                        const calculated = rating > 0 ? (rating / 5) * 10 : 0;
 
                         tableHTML += `
                             <tr>
@@ -3569,7 +3172,7 @@
                                     ${criterion.description ? `<div class="criteria-description">${criterion.description[lang]}</div>` : ''}
                                 </td>
                                 <td>${criterion.description ? criterion.description[lang] : ''}</td>
-                                <td style="text-align: center;"><span class="weight-badge">${criterion.weight}</span></td>
+                                <td style="text-align: center;"><span class="weight-badge">10</span></td>
                                 <td>
                                     <div class="rating-controls" data-criterion-id="${criterion.id}" data-criterion-type="department">
                                         ${[1,2,3,4,5].map(num => `
@@ -3673,7 +3276,14 @@
                             if (calculatedCell) {
                                 const criterion = this.getCriterionById(type, criterionId);
                                 if (criterion) {
-                                    const calculated = (value / 5) * criterion.weight;
+                                    let calculated;
+                                    if (type === 'general') {
+                                        // للمعايير العامة: الوزن 10
+                                        calculated = (value / 5) * criterion.weight;
+                                    } else {
+                                        // لمعايير القسم: الوزن 10
+                                        calculated = (value / 5) * 10;
+                                    }
                                     calculatedCell.textContent = calculated.toFixed(1);
                                 }
                             }
@@ -3699,7 +3309,13 @@
                 criteria.forEach(criterion => {
                     const rating = this.state.ratings[type].get(criterion.id) || 0;
                     if (rating > 0) {
-                        total += (rating / 5) * criterion.weight;
+                        if (type === 'general') {
+                            // للمعايير العامة: الوزن 10
+                            total += (rating / 5) * criterion.weight;
+                        } else {
+                            // لمعايير القسم: الوزن 10
+                            total += (rating / 5) * 10;
+                        }
                     }
                 });
                 return Math.round(total * 100) / 100;
@@ -3754,7 +3370,7 @@
                 const percentage = Math.round((totalScore / 100) * 100);
                 const grade = this.getGrade(percentage);
 
-                this.elements.summaryGeneral.textContent = `${generalScore.toFixed(2)}/15`;
+                this.elements.summaryGeneral.textContent = `${generalScore.toFixed(2)}/40`;
                 this.elements.summaryDepartment.textContent = `${departmentScore.toFixed(2)}/85`;
                 this.elements.summaryPercentage.textContent = `${percentage}%`;
                 this.elements.summaryGrade.textContent = grade.name;
@@ -3825,13 +3441,8 @@
                     // تحضير للطباعة
                     this.prepareForPrint();
 
-                    // الطباعة
+                    // طباعة التقرير
                     window.print();
-
-                    this.showNotification('success',
-                        lang === 'ar' ? 'تمت العملية' : 'Operation Completed',
-                        lang === 'ar' ? 'تم إرسال التقرير إلى قناة الموارد البشرية وتم تحضيره للطباعة' :
-                                      'Report sent to HR channel and prepared for printing');
 
                 } catch (error) {
                     console.error('Error:', error);
@@ -3900,31 +3511,20 @@
                 this.elements.printDepartmentNotesContent.textContent = truncateText(this.state.notes.department);
                 this.elements.printOverallNotesContent.textContent = truncateText(this.state.notes.overall);
 
+                // تحديث التقييمات المطبوعة
+                this.updatePrintedRatings();
+
                 // إظهار عناصر الطباعة
                 this.elements.printReportHeader.style.display = 'block';
                 this.elements.printSignatures.style.display = 'block';
                 this.elements.printNotesSummary.style.display = 'block';
-
-                // تحديث التقييمات المطبوعة
-                this.updatePrintedRatings();
-
-                // تقليل عدد الصفوف المعروضة في الجداول إذا كانت كثيرة
-                this.compressTablesForPrint();
             }
 
-            // دالة جديدة لضغط الجداول للطباعة
-            compressTablesForPrint() {
-                // تقليل المسافات في الجداول
-                const tables = document.querySelectorAll('.criteria-table');
-                tables.forEach(table => {
-                    // تقليل ارتفاع الصفوف
-                    const rows = table.querySelectorAll('tr');
-                    rows.forEach(row => {
-                        row.style.height = '15px';
-                        row.style.minHeight = '15px';
-                        row.style.maxHeight = '15px';
-                    });
-                });
+            cleanupAfterPrint() {
+                // إخفاء عناصر الطباعة بعد الانتهاء
+                this.elements.printReportHeader.style.display = 'none';
+                this.elements.printSignatures.style.display = 'none';
+                this.elements.printNotesSummary.style.display = 'none';
             }
 
             updatePrintedRatings() {
@@ -3997,7 +3597,7 @@
 📅 *${lang === 'ar' ? 'تاريخ التقييم:' : 'Evaluation Date:'}* ${reportData.date}
 ----------------------------
 📈 *${lang === 'ar' ? 'النتائج:' : 'Results:'}*
-• ${lang === 'ar' ? 'المعايير العامة:' : 'General Criteria:'} ${reportData.generalScore}/15
+• ${lang === 'ar' ? 'المعايير العامة:' : 'General Criteria:'} ${reportData.generalScore}/40
 • ${lang === 'ar' ? 'معايير القسم:' : 'Department Criteria:'} ${reportData.departmentScore}/85
 • ${lang === 'ar' ? 'الإجمالي:' : 'Total:'} ${reportData.totalScore.toFixed(2)}/100
 • ${lang === 'ar' ? 'النسبة:' : 'Percentage:'} ${reportData.percentage}%
@@ -4037,12 +3637,14 @@ ${lang === 'ar' ? 'تم إرسال هذا التقرير تلقائياً من �
 
                     const data = await response.json();
                     console.log('Message sent successfully:', data);
+                    return data;
                 } catch (error) {
                     console.error('Error sending message to Telegram:', error);
                     throw error;
                 }
             }
 
+            // ========== إصلاح دالة showNotification ==========
             showNotification(type, title, message) {
                 const notification = this.elements.notification;
                 const titleElem = this.elements.notificationTitle;
@@ -4079,27 +3681,6 @@ ${lang === 'ar' ? 'تم إرسال هذا التقرير تلقائياً من �
 
             hideNotification() {
                 this.elements.notification.classList.remove('show');
-            }
-
-            // ========== دالة لتحميل الشعار من ملف محلي ==========
-            async loadLogoFromFile(filePath) {
-                try {
-                    const response = await fetch(filePath);
-                    if (!response.ok) {
-                        throw new Error('لم يتم العثور على ملف الشعار');
-                    }
-
-                    const blob = await response.blob();
-                    return new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = () => reject(new Error('خطأ في قراءة ملف الشعار'));
-                        reader.readAsDataURL(blob);
-                    });
-                } catch (error) {
-                    console.error('فشل تحميل الشعار:', error);
-                    this.logoManager.useDefaultLogo();
-                }
             }
 
             // ========== دالة للحصول على الشعار الحالي ==========
