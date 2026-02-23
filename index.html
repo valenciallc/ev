@@ -2770,6 +2770,8 @@
                     }
                 };
 
+                this.originalTitle = ''; // لتخزين العنوان الأصلي للصفحة
+
                 this.cacheElements();
                 this.init();
             }
@@ -3443,6 +3445,11 @@
                     // تحضير للطباعة
                     this.prepareForPrint();
 
+                    // تغيير عنوان الصفحة لتحديد اسم الملف عند الحفظ بصيغة PDF
+                    this.originalTitle = document.title;
+                    const fileName = this.generateFileName(reportData);
+                    document.title = fileName;
+
                     // طباعة التقرير
                     window.print();
 
@@ -3453,6 +3460,24 @@
                         lang === 'ar' ? 'خطأ' : 'Error',
                         lang === 'ar' ? 'حدث خطأ أثناء العملية' : 'An error occurred during the operation');
                 }
+            }
+
+            /**
+             * توليد اسم ملف PDF بناءً على اسم الموظف وتاريخ التقييم
+             */
+            generateFileName(reportData) {
+                const lang = this.state.currentLanguage;
+                const employeeName = reportData.employee.split('-')[0].trim(); // أخذ الاسم فقط بدون المسمى الوظيفي
+                const date = new Date(this.state.evaluationDate);
+                const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+
+                // تنظيف الاسم من الأحرف غير الصالحة للملفات
+                const cleanName = employeeName.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '').replace(/\s+/g, '_');
+
+                // اسم الملف المقترح
+                return lang === 'ar' 
+                    ? `تقييم_${cleanName}_${formattedDate}`
+                    : `Evaluation_${cleanName}_${formattedDate}`;
             }
 
             prepareForPrint() {
@@ -3527,6 +3552,12 @@
                 this.elements.printReportHeader.style.display = 'none';
                 this.elements.printSignatures.style.display = 'none';
                 this.elements.printNotesSummary.style.display = 'none';
+
+                // استعادة عنوان الصفحة الأصلي
+                if (this.originalTitle) {
+                    document.title = this.originalTitle;
+                    this.originalTitle = '';
+                }
             }
 
             updatePrintedRatings() {
