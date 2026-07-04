@@ -497,6 +497,7 @@
             font-family: 'Cairo', sans-serif;
         }
         .btn-generate:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,136,204,0.4); }
+        .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         /* Notes */
         .notes-section {
@@ -535,6 +536,34 @@
             box-shadow: 0 3px 10px rgba(139,115,85,0.3);
         }
 
+        /* Rating scale legend */
+        .rating-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 20px 0;
+            font-size: 0.82rem;
+            color: var(--gray);
+        }
+        .rating-legend span { display:flex; align-items:center; gap:5px; }
+        .rating-legend b {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:20px; height:20px; border-radius:50%;
+            background:var(--gray-light); color:var(--dark); font-size:0.75rem;
+        }
+
+        .completion-badge {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .completion-badge.incomplete { background:#fff3e0; color:var(--warning); }
+        .completion-badge.complete   { background:#e8f5e9; color:var(--success); }
+
         /* Criteria Table */
         .criteria-table { width:100%; border-collapse:collapse; }
         .criteria-table th {
@@ -544,8 +573,9 @@
         }
         .criteria-table td { padding:15px; border-bottom:1px solid var(--gray-light); vertical-align:middle; }
         .criteria-table tr:hover { background:#f9f9f9; }
+        .criteria-table tr.unrated-row { background:#fffaf0; }
         .criteria-name { font-weight:600; color:var(--secondary); }
-        .criteria-description { color:var(--gray); font-size:0.9rem; margin-top:5px; }
+        .criteria-description { color:var(--gray); font-size:0.85rem; }
 
         .weight-badge {
             background: #e3f2fd; color:var(--secondary);
@@ -570,6 +600,7 @@
             font-weight:600; font-size:1.1rem;
             display:inline-block; min-width:70px; text-align:center;
         }
+        .calculated-value.empty { background:#f1f3f5; color:var(--gray); }
 
         /* Summary */
         .summary-container {
@@ -637,7 +668,8 @@
             body { background:white!important; font-size:10pt!important; }
             #loginScreen, #userTopBar, .language-switcher, .instructions-container,
             .controls-container, .notes-section, .btn-generate, .main-footer,
-            .logo-upload-btn, .rating-btn, .notification, .progress-container { display:none!important; }
+            .logo-upload-btn, .rating-btn, .notification, .progress-container,
+            .rating-legend, .completion-badge { display:none!important; }
             .print-report-header, .print-signatures, .notes-summary { display:block!important; }
             .print-report-header { text-align:center; margin-bottom:10px!important; padding:10px; border-bottom:2px solid #000; }
             .print-report-header h1 { font-size:18pt!important; }
@@ -881,6 +913,7 @@
             <div class="instruction-item"><strong id="instructionDurationTitle">مدة التقييم:</strong><span id="instructionDurationText">يشمل التقييم فترة العمل للشهر السابق من تاريخ التقييم</span></div>
             <div class="instruction-item"><strong id="instructionConfidentialTitle">سرية المعلومات:</strong><span id="instructionConfidentialText">جميع نتائج التقييم سرية وتحفظ في سجلات الموارد البشرية</span></div>
             <div class="instruction-item"><strong id="instructionAutoSendTitle">الإرسال التلقائي:</strong><span id="instructionAutoSendText">يتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة</span></div>
+            <div class="instruction-item"><strong id="instructionScoringTitle">آلية الاحتساب:</strong><span id="instructionScoringText">كل معيار يُقيَّم من 1 إلى 5، وتُحسب النتيجة النهائية كنسبة مئوية دقيقة من مجموع نقاط المعايير الفعلية (العامة + الخاصة بالقسم)، ولا يمكن إرسال التقرير قبل تقييم جميع المعايير الظاهرة</span></div>
         </div>
     </div>
 
@@ -959,8 +992,14 @@
     <div class="sections-container">
         <div class="section-card" id="generalSection">
             <div class="section-header">
-                <div class="section-title"><i class="fas fa-star"></i><span id="generalCriteriaTitle">المعايير العامة المشتركة (وزن كل معيار: 10)</span></div>
-                <div class="section-points">النقاط: <span id="generalScore">0</span>/40</div>
+                <div class="section-title"><i class="fas fa-star"></i><span id="generalCriteriaTitle">المعايير العامة المشتركة</span></div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="completion-badge incomplete" id="generalCompletionBadge"><i class="fas fa-circle-notch"></i> <span id="generalCompletionText">0/4</span></span>
+                    <div class="section-points">النقاط: <span id="generalScore">0</span>/<span id="generalMaxLabel">40</span></div>
+                </div>
+            </div>
+            <div class="rating-legend">
+                <span><b>1</b> ضعيف جداً</span><span><b>2</b> ضعيف</span><span><b>3</b> مقبول</span><span><b>4</b> جيد</span><span><b>5</b> ممتاز</span>
             </div>
             <div class="section-content">
                 <table class="criteria-table">
@@ -969,7 +1008,7 @@
                             <th width="30%">المعيار</th>
                             <th width="35%">الوصف</th>
                             <th width="10%">الوزن</th>
-                            <th width="15%">التقييم</th>
+                            <th width="15%">التقييم (1-5)</th>
                             <th width="10%">القيمة</th>
                         </tr>
                     </thead>
@@ -980,8 +1019,14 @@
 
         <div class="section-card" id="departmentSection">
             <div class="section-header">
-                <div class="section-title"><i class="fas fa-briefcase"></i><span id="departmentCriteriaTitle">معايير القسم (وزن كل معيار: 10)</span></div>
-                <div class="section-points">النقاط: <span id="departmentScore">0</span>/85</div>
+                <div class="section-title"><i class="fas fa-briefcase"></i><span id="departmentCriteriaTitle">معايير القسم</span></div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="completion-badge incomplete" id="departmentCompletionBadge" style="display:none;"><i class="fas fa-circle-notch"></i> <span id="departmentCompletionText">0/0</span></span>
+                    <div class="section-points" id="departmentPointsBox" style="display:none;">النقاط: <span id="departmentScore">0</span>/<span id="departmentMaxLabel">0</span></div>
+                </div>
+            </div>
+            <div class="rating-legend" id="departmentRatingLegend" style="display:none;">
+                <span><b>1</b> ضعيف جداً</span><span><b>2</b> ضعيف</span><span><b>3</b> مقبول</span><span><b>4</b> جيد</span><span><b>5</b> ممتاز</span>
             </div>
             <div class="section-content">
                 <div id="departmentCriteria">
@@ -1002,17 +1047,17 @@
             <div class="summary-item">
                 <div class="summary-label" id="summaryGeneralLabel">المعايير العامة</div>
                 <div class="summary-value" id="summaryGeneral">0/40</div>
-                <div class="summary-subtext">من 40 نقطة</div>
+                <div class="summary-subtext" id="summaryGeneralSubtext">من 40 نقطة</div>
             </div>
             <div class="summary-item">
                 <div class="summary-label" id="summaryDepartmentLabel">معايير القسم</div>
                 <div class="summary-value" id="summaryDepartment">0/85</div>
-                <div class="summary-subtext">من 85 نقطة</div>
+                <div class="summary-subtext" id="summaryDepartmentSubtext">من 85 نقطة</div>
             </div>
             <div class="summary-item">
                 <div class="summary-label" id="summaryPercentageLabel">النسبة المئوية</div>
                 <div class="summary-value" id="summaryPercentage">0%</div>
-                <div class="summary-subtext">من 100%</div>
+                <div class="summary-subtext" id="summaryPercentageSubtext">من إجمالي <span id="summaryTotalMax">100</span> نقطة</div>
             </div>
             <div class="summary-item">
                 <div class="summary-label" id="summaryGradeLabel">التقدير</div>
@@ -1025,7 +1070,7 @@
     <!-- Total Score -->
     <div class="total-score-container" id="totalScoreDisplay" style="display:none;">
         <div class="total-score-label" id="totalScoreLabel">النتيجة الإجمالية للتقييم</div>
-        <div class="total-score-value" id="finalScore">0</div>
+        <div class="total-score-value"><span id="finalScore">0</span> <span style="font-size:1.3rem; opacity:0.85;">/ <span id="finalMaxLabel">100</span></span></div>
         <div class="total-score-grade" id="scoreGrade">-</div>
         <div class="progress-container" style="max-width:400px;margin:20px auto;">
             <div class="progress-bar" id="scoreProgress" style="width:0%"></div>
@@ -1269,8 +1314,9 @@ const TRANSLATIONS = {
         instructionDurationTitle:'مدة التقييم:', instructionDurationText:'يشمل التقييم فترة العمل للشهر السابق من تاريخ التقييم',
         instructionConfidentialTitle:'سرية المعلومات:', instructionConfidentialText:'جميع نتائج التقييم سرية وتحفظ في سجلات الموارد البشرية',
         instructionAutoSendTitle:'الإرسال التلقائي:', instructionAutoSendText:'يتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة',
+        instructionScoringTitle:'آلية الاحتساب:', instructionScoringText:'كل معيار يُقيَّم من 1 إلى 5، وتُحسب النتيجة النهائية كنسبة مئوية دقيقة من مجموع نقاط المعايير الفعلية (العامة + الخاصة بالقسم)، ولا يمكن إرسال التقرير قبل تقييم جميع المعايير الظاهرة',
         settingsTitle:'إعدادات التقييم', departmentLabel:'القسم', employeeLabel:'الموظف', supervisorLabel:'المشرف المباشر', dateLabel:'تاريخ التقييم', generateButtonText:'طباعة وإرسال التقرير',
-        generalCriteriaTitle:'المعايير العامة المشتركة (وزن كل معيار: 10)', departmentCriteriaTitle:'معايير القسم (وزن كل معيار: 10)',
+        generalCriteriaTitle:'المعايير العامة المشتركة', departmentCriteriaTitle:'معايير القسم',
         selectPromptTitle:'اختر القسم والموظف', selectPromptText:'يرجى اختيار القسم والموظف من أعلى الصفحة لعرض معايير التقييم الخاصة به',
         summaryTitle:'ملخص النتائج', summaryGeneralLabel:'المعايير العامة', summaryDepartmentLabel:'معايير القسم', summaryPercentageLabel:'النسبة المئوية', summaryGradeLabel:'التقدير',
         totalScoreLabel:'النتيجة الإجمالية للتقييم',
@@ -1290,8 +1336,9 @@ const TRANSLATIONS = {
         instructionDurationTitle:'Evaluation Period:', instructionDurationText:'Covers the work period of the previous month from evaluation date',
         instructionConfidentialTitle:'Confidentiality:', instructionConfidentialText:'All results are confidential and kept in HR records',
         instructionAutoSendTitle:'Auto Send:', instructionAutoSendText:'A copy is automatically sent to the HR channel upon printing',
+        instructionScoringTitle:'Scoring Method:', instructionScoringText:'Each criterion is rated from 1 to 5. The final score is calculated as an accurate percentage of the actual total possible points (general + department-specific), and the report cannot be sent until all visible criteria are rated',
         settingsTitle:'Evaluation Settings', departmentLabel:'Department', employeeLabel:'Employee', supervisorLabel:'Direct Supervisor', dateLabel:'Evaluation Date', generateButtonText:'Print and Send Report',
-        generalCriteriaTitle:'General Shared Criteria (Weight per criterion: 10)', departmentCriteriaTitle:'Department Criteria (Weight per criterion: 10)',
+        generalCriteriaTitle:'General Shared Criteria', departmentCriteriaTitle:'Department Criteria',
         selectPromptTitle:'Select Department and Employee', selectPromptText:'Please select the department and employee above to display evaluation criteria',
         summaryTitle:'Results Summary', summaryGeneralLabel:'General Criteria', summaryDepartmentLabel:'Department Criteria', summaryPercentageLabel:'Percentage', summaryGradeLabel:'Grade',
         totalScoreLabel:'Total Evaluation Score',
@@ -1446,9 +1493,9 @@ const ORGANIZATION_DATA = {
                 {id:'new_tasks',          name:{ar:'قبول مهام جديدة والتكيف معها',en:'Adapting to New Tasks'},description:{ar:'المرونة',en:'Flexibility'}, weight:10},
                 {id:'physical_strength',  name:{ar:'القوة البدنية',en:'Physical Strength'},description:{ar:'القدرة على حمل الأوزان',en:'Ability to carry weights'}, weight:10},
                 {id:'stone_repair',       name:{ar:'إصلاح الحجر المكسور',en:'Repair of Broken Stone'},description:{ar:'المهارة',en:'Skill'}, weight:10},
-                {id:'storage_accuracy',   name:{ar:'دقة التخزين والجرد',en:'Storage and Inventory Accuracy'}, weight:10},
-                {id:'task_speed',         name:{ar:'سرعة تنفيذ المهام',en:'Task Execution Speed'}, weight:10},
-                {id:'safety_procedures',  name:{ar:'الالتزام بإجراءات السلامة',en:'Adherence to Safety Procedures'}, weight:10}
+                {id:'storage_accuracy',   name:{ar:'دقة التخزين والجرد',en:'Storage and Inventory Accuracy'},description:{ar:'التنظيم والدقة',en:'Organization and accuracy'}, weight:10},
+                {id:'task_speed',         name:{ar:'سرعة تنفيذ المهام',en:'Task Execution Speed'},description:{ar:'الكفاءة',en:'Efficiency'}, weight:10},
+                {id:'safety_procedures',  name:{ar:'الالتزام بإجراءات السلامة',en:'Adherence to Safety Procedures'},description:{ar:'الوعي بالسلامة',en:'Safety awareness'}, weight:10}
             ]
         },
         design: {
@@ -1464,10 +1511,10 @@ const ORGANIZATION_DATA = {
                 {id:'quotation_speed',   name:{ar:'سرعة تنفيذ عرض السعر',en:'Quotation Speed'},description:{ar:'الكفاءة',en:'Efficiency'}, weight:10},
                 {id:'quick_wit',         name:{ar:'سرعة البديهة',en:'Quick Wit'},description:{ar:'الحلول السريعة',en:'Quick solutions'}, weight:10},
                 {id:'design_problems',   name:{ar:'حل المشاكل التصميمية',en:'Solving Design Problems'},description:{ar:'الإبداع',en:'Creativity'}, weight:10},
-                {id:'quantity_accuracy', name:{ar:'دقة الكميات والحسابات',en:'Quantity Accuracy'}, weight:10},
-                {id:'material_knowledge',name:{ar:'حفظ المواد والديكورات بالمواصفات',en:'Material Knowledge'}, weight:10},
-                {id:'quotation_pricing', name:{ar:'تسعير عروض الأسعار',en:'Quotation Pricing'},description:{ar:'الدقة، التنافسية',en:'Accuracy'}, weight:10},
-                {id:'delivery_deadlines',name:{ar:'الالتزام بمواعيد التسليم',en:'Delivery Deadlines'}, weight:10}
+                {id:'quantity_accuracy', name:{ar:'دقة الكميات والحسابات',en:'Quantity Accuracy'},description:{ar:'الدقة الرقمية',en:'Numerical accuracy'}, weight:10},
+                {id:'material_knowledge',name:{ar:'حفظ المواد والديكورات بالمواصفات',en:'Material Knowledge'},description:{ar:'المعرفة الفنية',en:'Technical knowledge'}, weight:10},
+                {id:'quotation_pricing', name:{ar:'تسعير عروض الأسعار',en:'Quotation Pricing'},description:{ar:'الدقة، التنافسية',en:'Accuracy, competitiveness'}, weight:10},
+                {id:'delivery_deadlines',name:{ar:'الالتزام بمواعيد التسليم',en:'Delivery Deadlines'},description:{ar:'الانضباط الزمني',en:'Time discipline'}, weight:10}
             ]
         },
         vehicles: {
@@ -1495,21 +1542,21 @@ const ORGANIZATION_DATA = {
             criteria: {
                 forklift_drivers:[
                     {id:'driver_experience',  name:{ar:'خبرة السائق',en:'Driver Experience'},description:{ar:'المهارة، الأمان',en:'Skill, safety'}, weight:10},
-                    {id:'periodic_maintenance',name:{ar:'الصيانة الدورية',en:'Periodic Maintenance'}, weight:10},
-                    {id:'forklift_cleanliness',name:{ar:'نظافة الفوركليفت',en:'Forklift Cleanliness'}, weight:10},
-                    {id:'driving_experience',  name:{ar:'الخبرة في القيادة',en:'Driving Experience'}, weight:10},
-                    {id:'loading_experience',  name:{ar:'خبرة التحميل والتنزيل',en:'Loading Experience'}, weight:10},
-                    {id:'safety_forklift',     name:{ar:'الالتزام بإجراءات السلامة',en:'Safety Procedures'}, weight:10}
+                    {id:'periodic_maintenance',name:{ar:'الصيانة الدورية',en:'Periodic Maintenance'},description:{ar:'الاهتمام بالمركبة',en:'Vehicle care'}, weight:10},
+                    {id:'forklift_cleanliness',name:{ar:'نظافة الفوركليفت',en:'Forklift Cleanliness'},description:{ar:'النظافة العامة',en:'General cleanliness'}, weight:10},
+                    {id:'driving_experience',  name:{ar:'الخبرة في القيادة',en:'Driving Experience'},description:{ar:'الكفاءة الفنية',en:'Technical competence'}, weight:10},
+                    {id:'loading_experience',  name:{ar:'خبرة التحميل والتنزيل',en:'Loading Experience'},description:{ar:'الدقة والسرعة',en:'Accuracy and speed'}, weight:10},
+                    {id:'safety_forklift',     name:{ar:'الالتزام بإجراءات السلامة',en:'Safety Procedures'},description:{ar:'الوعي بالسلامة',en:'Safety awareness'}, weight:10}
                 ],
                 shipping_drivers:[
-                    {id:'vehicle_maintenance', name:{ar:'المحافظة على السيارة',en:'Vehicle Maintenance'}, weight:10},
-                    {id:'cleanliness_v',       name:{ar:'النظافة الداخلية والخارجية',en:'Internal/External Cleanliness'}, weight:10},
-                    {id:'work_speed_v',        name:{ar:'سرعة إتمام العمل',en:'Work Speed'}, weight:10},
-                    {id:'crane_experience',    name:{ar:'خبرة استخدام الكرين',en:'Crane Experience'}, weight:10},
-                    {id:'maintenance_schedule',name:{ar:'الالتزام بمواعيد الصيانة',en:'Maintenance Schedule'}, weight:10},
-                    {id:'fault_reporting',     name:{ar:'الإبلاغ عن الأعطال فوراً',en:'Fault Reporting'}, weight:10},
-                    {id:'daily_check',         name:{ar:'الفحص اليومي',en:'Daily Check'}, weight:10},
-                    {id:'traffic_rules',       name:{ar:'الالتزام بقواعد المرور',en:'Traffic Rules'}, weight:10}
+                    {id:'vehicle_maintenance', name:{ar:'المحافظة على السيارة',en:'Vehicle Maintenance'},description:{ar:'العناية الدورية',en:'Periodic care'}, weight:10},
+                    {id:'cleanliness_v',       name:{ar:'النظافة الداخلية والخارجية',en:'Internal/External Cleanliness'},description:{ar:'المظهر العام',en:'Overall appearance'}, weight:10},
+                    {id:'work_speed_v',        name:{ar:'سرعة إتمام العمل',en:'Work Speed'},description:{ar:'الكفاءة',en:'Efficiency'}, weight:10},
+                    {id:'crane_experience',    name:{ar:'خبرة استخدام الكرين',en:'Crane Experience'},description:{ar:'المهارة الفنية',en:'Technical skill'}, weight:10},
+                    {id:'maintenance_schedule',name:{ar:'الالتزام بمواعيد الصيانة',en:'Maintenance Schedule'},description:{ar:'الانضباط',en:'Discipline'}, weight:10},
+                    {id:'fault_reporting',     name:{ar:'الإبلاغ عن الأعطال فوراً',en:'Fault Reporting'},description:{ar:'سرعة الإبلاغ',en:'Prompt reporting'}, weight:10},
+                    {id:'daily_check',         name:{ar:'الفحص اليومي',en:'Daily Check'},description:{ar:'الالتزام اليومي',en:'Daily discipline'}, weight:10},
+                    {id:'traffic_rules',       name:{ar:'الالتزام بقواعد المرور',en:'Traffic Rules'},description:{ar:'السلامة المرورية',en:'Road safety'}, weight:10}
                 ]
             }
         },
@@ -1524,13 +1571,13 @@ const ORGANIZATION_DATA = {
             ],
             criteria:[
                 {id:'accounting_accuracy',name:{ar:'الدقة المحاسبية',en:'Accounting Accuracy'},description:{ar:'إدخال البيانات',en:'Data entry'}, weight:10},
-                {id:'timeliness',          name:{ar:'الالتزام بالمواعيد',en:'Timeliness'}, weight:10},
-                {id:'confidentiality',     name:{ar:'السرية والأمانة',en:'Confidentiality and Integrity'}, weight:10},
-                {id:'organization_f',      name:{ar:'التنظيم',en:'Organization'}, weight:10},
-                {id:'accounting_standards',name:{ar:'الالتزام بالمعايير المحاسبية',en:'Accounting Standards'}, weight:10},
-                {id:'task_completion_f',   name:{ar:'إنجاز المهام المالية في الوقت',en:'Timely Task Completion'}, weight:10},
-                {id:'info_confidentiality',name:{ar:'حفظ سرية المعلومات المالية',en:'Financial Info Confidentiality'}, weight:10},
-                {id:'records_organization',name:{ar:'تنظيم السجلات والمستندات',en:'Records Organization'}, weight:10}
+                {id:'timeliness',          name:{ar:'الالتزام بالمواعيد',en:'Timeliness'},description:{ar:'الانضباط الزمني',en:'Time discipline'}, weight:10},
+                {id:'confidentiality',     name:{ar:'السرية والأمانة',en:'Confidentiality and Integrity'},description:{ar:'حفظ الأسرار',en:'Keeping secrets'}, weight:10},
+                {id:'organization_f',      name:{ar:'التنظيم',en:'Organization'},description:{ar:'ترتيب العمل',en:'Work order'}, weight:10},
+                {id:'accounting_standards',name:{ar:'الالتزام بالمعايير المحاسبية',en:'Accounting Standards'},description:{ar:'الدقة المهنية',en:'Professional accuracy'}, weight:10},
+                {id:'task_completion_f',   name:{ar:'إنجاز المهام المالية في الوقت',en:'Timely Task Completion'},description:{ar:'الالتزام بالمواعيد',en:'Meeting deadlines'}, weight:10},
+                {id:'info_confidentiality',name:{ar:'حفظ سرية المعلومات المالية',en:'Financial Info Confidentiality'},description:{ar:'الأمانة',en:'Integrity'}, weight:10},
+                {id:'records_organization',name:{ar:'تنظيم السجلات والمستندات',en:'Records Organization'},description:{ar:'الترتيب والأرشفة',en:'Filing and archiving'}, weight:10}
             ]
         },
         marketing: {
@@ -1539,28 +1586,28 @@ const ORGANIZATION_DATA = {
                 photographer: { name:{ar:'فريق التصوير',en:'Photography Team'}, supervisor:'أمين',
                     employees:[{id:'ammar',name:'عمار فادي عوض',position:{ar:'مصور',en:'Photographer'}}],
                     criteria:[
-                        {id:'photo_quality',   name:{ar:'جودة التصوير',en:'Photo Quality'}, weight:10},
-                        {id:'content_creativity',name:{ar:'التنوع والإبداع في المحتوى',en:'Content Creativity'}, weight:10},
-                        {id:'production_speed', name:{ar:'سرعة الإنتاج',en:'Production Speed'}, weight:10},
-                        {id:'coordination',     name:{ar:'التنسيق مع فريق المونتاج',en:'Team Coordination'}, weight:10},
-                        {id:'peak_hours',       name:{ar:'التواجد في أوقات الذروة',en:'Peak Hours Presence'}, weight:10}
+                        {id:'photo_quality',   name:{ar:'جودة التصوير',en:'Photo Quality'},description:{ar:'الوضوح والإضاءة',en:'Clarity and lighting'}, weight:10},
+                        {id:'content_creativity',name:{ar:'التنوع والإبداع في المحتوى',en:'Content Creativity'},description:{ar:'الأفكار الجديدة',en:'Fresh ideas'}, weight:10},
+                        {id:'production_speed', name:{ar:'سرعة الإنتاج',en:'Production Speed'},description:{ar:'الكفاءة الزمنية',en:'Time efficiency'}, weight:10},
+                        {id:'coordination',     name:{ar:'التنسيق مع فريق المونتاج',en:'Team Coordination'},description:{ar:'العمل الجماعي',en:'Teamwork'}, weight:10},
+                        {id:'peak_hours',       name:{ar:'التواجد في أوقات الذروة',en:'Peak Hours Presence'},description:{ar:'الالتزام بالتواجد',en:'Availability'}, weight:10}
                     ]},
                 editor: { name:{ar:'فريق المونتاج',en:'Editing Team'}, supervisor:'أمين',
                     employees:[{id:'samer_e',name:'سامر جنيد',position:{ar:'مونتاج',en:'Video Editor'}}],
                     criteria:[
-                        {id:'editing_quality',  name:{ar:'جودة المونتاج',en:'Editing Quality'}, weight:10},
-                        {id:'delivery_speed_e', name:{ar:'سرعة التسليم',en:'Delivery Speed'}, weight:10},
-                        {id:'editing_creativity',name:{ar:'الإبداع في التحرير',en:'Editing Creativity'}, weight:10},
-                        {id:'visual_identity',  name:{ar:'الالتزام بالهوية البصرية',en:'Visual Identity'}, weight:10}
+                        {id:'editing_quality',  name:{ar:'جودة المونتاج',en:'Editing Quality'},description:{ar:'الاحترافية الفنية',en:'Technical professionalism'}, weight:10},
+                        {id:'delivery_speed_e', name:{ar:'سرعة التسليم',en:'Delivery Speed'},description:{ar:'الالتزام بالمواعيد',en:'Meeting deadlines'}, weight:10},
+                        {id:'editing_creativity',name:{ar:'الإبداع في التحرير',en:'Editing Creativity'},description:{ar:'الأفكار الإبداعية',en:'Creative ideas'}, weight:10},
+                        {id:'visual_identity',  name:{ar:'الالتزام بالهوية البصرية',en:'Visual Identity'},description:{ar:'التناسق مع الهوية',en:'Brand consistency'}, weight:10}
                     ]},
                 designer: { name:{ar:'فريق التصميم والإعلانات',en:'Design Team'}, supervisor:'أمين',
                     employees:[{id:'rabah',name:'رباح الحموي',position:{ar:'مصمم إعلان/ناشر',en:'Ad Designer/Publisher'}}],
                     criteria:[
-                        {id:'campaign_mgmt',     name:{ar:'إدارة الحملات الإعلانية المدفوعة',en:'Paid Campaign Management'}, weight:10},
-                        {id:'interaction_d',     name:{ar:'التفاعل مع المتابعين',en:'Follower Interaction'}, weight:10},
-                        {id:'publishing_schedule',name:{ar:'الالتزام بجدول النشر',en:'Publishing Schedule'}, weight:10},
-                        {id:'off_hours',         name:{ar:'الرد خارج أوقات الدوام',en:'Off-Hours Response'}, weight:10},
-                        {id:'page_coordination', name:{ar:'تنسيق الصفحات والمحتوى',en:'Page Coordination'}, weight:10}
+                        {id:'campaign_mgmt',     name:{ar:'إدارة الحملات الإعلانية المدفوعة',en:'Paid Campaign Management'},description:{ar:'الكفاءة الإعلانية',en:'Ad efficiency'}, weight:10},
+                        {id:'interaction_d',     name:{ar:'التفاعل مع المتابعين',en:'Follower Interaction'},description:{ar:'سرعة التفاعل',en:'Interaction speed'}, weight:10},
+                        {id:'publishing_schedule',name:{ar:'الالتزام بجدول النشر',en:'Publishing Schedule'},description:{ar:'الانضباط الزمني',en:'Time discipline'}, weight:10},
+                        {id:'off_hours',         name:{ar:'الرد خارج أوقات الدوام',en:'Off-Hours Response'},description:{ar:'المرونة',en:'Flexibility'}, weight:10},
+                        {id:'page_coordination', name:{ar:'تنسيق الصفحات والمحتوى',en:'Page Coordination'},description:{ar:'التنظيم',en:'Organization'}, weight:10}
                     ]},
                 social_media: { name:{ar:'فريق السوشيال ميديا',en:'Social Media Team'}, supervisor:'أمين',
                     employees:[
@@ -1568,11 +1615,11 @@ const ORGANIZATION_DATA = {
                         {id:'rania',name:'رانيا فريد',    position:{ar:'سوشيال ميديا',en:'Social Media Specialist'}}
                     ],
                     criteria:[
-                        {id:'country_knowledge',  name:{ar:'مستوى المعلومات عن الدولة وكيفية الرد',en:'Country Knowledge'}, weight:10},
-                        {id:'interaction_sm',     name:{ar:'التفاعل مع المتابعين والرد على الرسائل',en:'Interaction'}, weight:10},
-                        {id:'readiness_peak',     name:{ar:'الجاهزية بأوقات الذروة والعروض',en:'Peak Readiness'}, weight:10},
-                        {id:'off_hours_sm',       name:{ar:'الرد خارج أوقات الدوام',en:'Off-Hours Response'}, weight:10},
-                        {id:'field_knowledge',    name:{ar:'مستوى معلوماتهم وخبرتهم في مجال الشركة',en:'Field Knowledge'}, weight:10}
+                        {id:'country_knowledge',  name:{ar:'مستوى المعلومات عن الدولة وكيفية الرد',en:'Country Knowledge'},description:{ar:'المعرفة الثقافية',en:'Cultural knowledge'}, weight:10},
+                        {id:'interaction_sm',     name:{ar:'التفاعل مع المتابعين والرد على الرسائل',en:'Interaction'},description:{ar:'سرعة الرد',en:'Response speed'}, weight:10},
+                        {id:'readiness_peak',     name:{ar:'الجاهزية بأوقات الذروة والعروض',en:'Peak Readiness'},description:{ar:'التخطيط المسبق',en:'Advance planning'}, weight:10},
+                        {id:'off_hours_sm',       name:{ar:'الرد خارج أوقات الدوام',en:'Off-Hours Response'},description:{ar:'المرونة',en:'Flexibility'}, weight:10},
+                        {id:'field_knowledge',    name:{ar:'مستوى معلوماتهم وخبرتهم في مجال الشركة',en:'Field Knowledge'},description:{ar:'الخبرة المهنية',en:'Professional experience'}, weight:10}
                     ]}
             }
         },
@@ -1617,24 +1664,24 @@ const ORGANIZATION_DATA = {
             },
             criteria: {
                 foremen:[
-                    {id:'instructions_accuracy',name:{ar:'تنفيذ التعليمات بدقة',en:'Accurate Execution'}, weight:10},
-                    {id:'measurements',         name:{ar:'المقاسات وشد الخيوط',en:'Measurements'}, weight:10},
-                    {id:'defect_detection',     name:{ar:'عزل الحجر السيئ واكتشاف العيوب',en:'Defect Detection'}, weight:10},
-                    {id:'stone_arrangement',    name:{ar:'ترتيب الحجر في الموقع',en:'Stone Arrangement'}, weight:10},
-                    {id:'finishing_quality',    name:{ar:'جودة التشطيب النهائي',en:'Finishing Quality'}, weight:10},
-                    {id:'decor_arrangement',    name:{ar:'ترتيب الديكورات والإكسسوارات',en:'Décor Arrangement'}, weight:10},
-                    {id:'scaffolding_safety',   name:{ar:'تركيب السقالات بأمان',en:'Safe Scaffolding'}, weight:10},
-                    {id:'installation_speed',   name:{ar:'سرعة التركيب مع الحفاظ على الجودة',en:'Installation Speed'}, weight:10},
-                    {id:'overtime',             name:{ar:'الاستعداد للعمل الإضافي',en:'Overtime Willingness'}, weight:10},
-                    {id:'daily_tasks',          name:{ar:'الإنجاز اليومي للمهام',en:'Daily Task Completion'}, weight:10}
+                    {id:'instructions_accuracy',name:{ar:'تنفيذ التعليمات بدقة',en:'Accurate Execution'},description:{ar:'الالتزام بالتوجيهات',en:'Following directions'}, weight:10},
+                    {id:'measurements',         name:{ar:'المقاسات وشد الخيوط',en:'Measurements'},description:{ar:'الدقة الهندسية',en:'Engineering accuracy'}, weight:10},
+                    {id:'defect_detection',     name:{ar:'عزل الحجر السيئ واكتشاف العيوب',en:'Defect Detection'},description:{ar:'مراقبة الجودة',en:'Quality control'}, weight:10},
+                    {id:'stone_arrangement',    name:{ar:'ترتيب الحجر في الموقع',en:'Stone Arrangement'},description:{ar:'التنظيم',en:'Organization'}, weight:10},
+                    {id:'finishing_quality',    name:{ar:'جودة التشطيب النهائي',en:'Finishing Quality'},description:{ar:'الإتقان',en:'Craftsmanship'}, weight:10},
+                    {id:'decor_arrangement',    name:{ar:'ترتيب الديكورات والإكسسوارات',en:'Décor Arrangement'},description:{ar:'الذوق الفني',en:'Aesthetic sense'}, weight:10},
+                    {id:'scaffolding_safety',   name:{ar:'تركيب السقالات بأمان',en:'Safe Scaffolding'},description:{ar:'السلامة',en:'Safety'}, weight:10},
+                    {id:'installation_speed',   name:{ar:'سرعة التركيب مع الحفاظ على الجودة',en:'Installation Speed'},description:{ar:'التوازن بين السرعة والجودة',en:'Balance of speed and quality'}, weight:10},
+                    {id:'overtime',             name:{ar:'الاستعداد للعمل الإضافي',en:'Overtime Willingness'},description:{ar:'المرونة',en:'Flexibility'}, weight:10},
+                    {id:'daily_tasks',          name:{ar:'الإنجاز اليومي للمهام',en:'Daily Task Completion'},description:{ar:'الالتزام اليومي',en:'Daily commitment'}, weight:10}
                 ],
                 project_workers:[
-                    {id:'instructions_following',name:{ar:'تنفيذ التعليمات بدقة',en:'Following Instructions'}, weight:10},
-                    {id:'measurements_compliance',name:{ar:'الالتزام بالمقاسات المطلوبة',en:'Measurements Compliance'}, weight:10},
-                    {id:'defect_isolation',      name:{ar:'اكتشاف وعزل الحجر المعيب',en:'Defect Isolation'}, weight:10},
-                    {id:'workplace_organization',name:{ar:'ترتيب مكان العمل',en:'Workplace Organization'}, weight:10},
-                    {id:'safety_p',              name:{ar:'الالتزام بإجراءات السلامة',en:'Safety Procedures'}, weight:10},
-                    {id:'task_speed_p',          name:{ar:'سرعة إنجاز المهام',en:'Task Speed'}, weight:10}
+                    {id:'instructions_following',name:{ar:'تنفيذ التعليمات بدقة',en:'Following Instructions'},description:{ar:'الالتزام بالتوجيهات',en:'Following directions'}, weight:10},
+                    {id:'measurements_compliance',name:{ar:'الالتزام بالمقاسات المطلوبة',en:'Measurements Compliance'},description:{ar:'الدقة',en:'Accuracy'}, weight:10},
+                    {id:'defect_isolation',      name:{ar:'اكتشاف وعزل الحجر المعيب',en:'Defect Isolation'},description:{ar:'مراقبة الجودة',en:'Quality control'}, weight:10},
+                    {id:'workplace_organization',name:{ar:'ترتيب مكان العمل',en:'Workplace Organization'},description:{ar:'النظام',en:'Order'}, weight:10},
+                    {id:'safety_p',              name:{ar:'الالتزام بإجراءات السلامة',en:'Safety Procedures'},description:{ar:'الوعي بالسلامة',en:'Safety awareness'}, weight:10},
+                    {id:'task_speed_p',          name:{ar:'سرعة إنجاز المهام',en:'Task Speed'},description:{ar:'الكفاءة',en:'Efficiency'}, weight:10}
                 ]
             }
         },
@@ -1664,38 +1711,38 @@ const ORGANIZATION_DATA = {
             },
             criteria: {
                 project_workers:[
-                    {id:'instructions_m',    name:{ar:'تنفيذ التعليمات بدقة',en:'Execute Instructions'}, weight:10},
-                    {id:'measurements_m',    name:{ar:'الدقة في المقاسات',en:'Measurement Accuracy'}, weight:10},
-                    {id:'stone_defect_m',    name:{ar:'عزل الحجر السيئ واكتشاف العيوب',en:'Defect Detection'}, weight:10},
-                    {id:'stone_arrangement_m',name:{ar:'ترتيب الحجر في الموقع',en:'Stone Arrangement'}, weight:10},
-                    {id:'work_safety_m',     name:{ar:'السلامة في العمل',en:'Work Safety'}, weight:10},
-                    {id:'work_speed_m',      name:{ar:'سرعة الإنجاز',en:'Work Speed'}, weight:10},
-                    {id:'material_preservation',name:{ar:'المحافظة على المواد',en:'Material Preservation'}, weight:10}
+                    {id:'instructions_m',    name:{ar:'تنفيذ التعليمات بدقة',en:'Execute Instructions'},description:{ar:'الالتزام بالتوجيهات',en:'Following directions'}, weight:10},
+                    {id:'measurements_m',    name:{ar:'الدقة في المقاسات',en:'Measurement Accuracy'},description:{ar:'الدقة الهندسية',en:'Engineering accuracy'}, weight:10},
+                    {id:'stone_defect_m',    name:{ar:'عزل الحجر السيئ واكتشاف العيوب',en:'Defect Detection'},description:{ar:'مراقبة الجودة',en:'Quality control'}, weight:10},
+                    {id:'stone_arrangement_m',name:{ar:'ترتيب الحجر في الموقع',en:'Stone Arrangement'},description:{ar:'التنظيم',en:'Organization'}, weight:10},
+                    {id:'work_safety_m',     name:{ar:'السلامة في العمل',en:'Work Safety'},description:{ar:'الوعي بالسلامة',en:'Safety awareness'}, weight:10},
+                    {id:'work_speed_m',      name:{ar:'سرعة الإنجاز',en:'Work Speed'},description:{ar:'الكفاءة',en:'Efficiency'}, weight:10},
+                    {id:'material_preservation',name:{ar:'المحافظة على المواد',en:'Material Preservation'},description:{ar:'تقليل الفاقد',en:'Reducing waste'}, weight:10}
                 ],
                 cutting_workers:[
-                    {id:'cutting_accuracy',name:{ar:'دقة القص حسب المقاسات',en:'Cutting Accuracy'}, weight:10},
-                    {id:'waste_reduction', name:{ar:'تقليل الهدر في المواد',en:'Waste Reduction'}, weight:10},
-                    {id:'machine_safety',  name:{ar:'سلامة تشغيل آلات القص',en:'Machine Safety'}, weight:10},
-                    {id:'edge_quality',    name:{ar:'جودة الحواف ونظافتها',en:'Edge Quality'}, weight:10},
-                    {id:'machine_maint',   name:{ar:'الصيانة البسيطة للآلات',en:'Basic Machine Maintenance'}, weight:10},
-                    {id:'productivity_m',  name:{ar:'الإنتاجية وجودة القطع',en:'Productivity'}, weight:10}
+                    {id:'cutting_accuracy',name:{ar:'دقة القص حسب المقاسات',en:'Cutting Accuracy'},description:{ar:'الدقة الهندسية',en:'Engineering accuracy'}, weight:10},
+                    {id:'waste_reduction', name:{ar:'تقليل الهدر في المواد',en:'Waste Reduction'},description:{ar:'الكفاءة الاقتصادية',en:'Economic efficiency'}, weight:10},
+                    {id:'machine_safety',  name:{ar:'سلامة تشغيل آلات القص',en:'Machine Safety'},description:{ar:'الوعي بالسلامة',en:'Safety awareness'}, weight:10},
+                    {id:'edge_quality',    name:{ar:'جودة الحواف ونظافتها',en:'Edge Quality'},description:{ar:'الإتقان',en:'Craftsmanship'}, weight:10},
+                    {id:'machine_maint',   name:{ar:'الصيانة البسيطة للآلات',en:'Basic Machine Maintenance'},description:{ar:'العناية بالمعدات',en:'Equipment care'}, weight:10},
+                    {id:'productivity_m',  name:{ar:'الإنتاجية وجودة القطع',en:'Productivity'},description:{ar:'الكفاءة والجودة',en:'Efficiency and quality'}, weight:10}
                 ],
                 installation_workers:[
-                    {id:'install_accuracy',name:{ar:'دقة التركيب حسب التصميم',en:'Installation Accuracy'}, weight:10},
-                    {id:'install_speed',   name:{ar:'سرعة التركيب مع الحفاظ على الجودة',en:'Installation Speed'}, weight:10},
-                    {id:'install_align',   name:{ar:'تنسيق واستواء التركيب',en:'Alignment'}, weight:10},
-                    {id:'tool_skills',     name:{ar:'مهارة استخدام أدوات التركيب',en:'Tool Skills'}, weight:10},
-                    {id:'cleaning_after',  name:{ar:'تنظيف المكان بعد التركيب',en:'Post-Installation Cleaning'}, weight:10},
-                    {id:'professionalism_m',name:{ar:'الاحترافية في التعامل في مواقع العملاء',en:'Professionalism'}, weight:10}
+                    {id:'install_accuracy',name:{ar:'دقة التركيب حسب التصميم',en:'Installation Accuracy'},description:{ar:'الدقة الهندسية',en:'Engineering accuracy'}, weight:10},
+                    {id:'install_speed',   name:{ar:'سرعة التركيب مع الحفاظ على الجودة',en:'Installation Speed'},description:{ar:'التوازن بين السرعة والجودة',en:'Balance of speed and quality'}, weight:10},
+                    {id:'install_align',   name:{ar:'تنسيق واستواء التركيب',en:'Alignment'},description:{ar:'الدقة البصرية',en:'Visual precision'}, weight:10},
+                    {id:'tool_skills',     name:{ar:'مهارة استخدام أدوات التركيب',en:'Tool Skills'},description:{ar:'الكفاءة الفنية',en:'Technical skill'}, weight:10},
+                    {id:'cleaning_after',  name:{ar:'تنظيف المكان بعد التركيب',en:'Post-Installation Cleaning'},description:{ar:'الاحترافية',en:'Professionalism'}, weight:10},
+                    {id:'professionalism_m',name:{ar:'الاحترافية في التعامل في مواقع العملاء',en:'Professionalism'},description:{ar:'حسن التعامل',en:'Good conduct'}, weight:10}
                 ],
                 finishing_workers:[
-                    {id:'finishing_quality_m',name:{ar:'جودة التشطيب النهائي',en:'Finishing Quality'}, weight:10},
-                    {id:'attention_detail',   name:{ar:'الاهتمام بالتفاصيل الدقيقة',en:'Attention to Detail'}, weight:10},
-                    {id:'treatment_quality',  name:{ar:'جودة المعالجات النهائية',en:'Treatment Quality'}, weight:10},
-                    {id:'safety_finishing',   name:{ar:'التعامل الآمن مع مواد التشطيب',en:'Safe Material Handling'}, weight:10},
-                    {id:'surface_protection', name:{ar:'الحفاظ على السطح من الخدوش',en:'Surface Protection'}, weight:10},
-                    {id:'finishing_speed',    name:{ar:'سرعة إنجاز التشطيب',en:'Finishing Speed'}, weight:10},
-                    {id:'final_inspection',   name:{ar:'الفحص النهائي للجودة',en:'Final Inspection'}, weight:10}
+                    {id:'finishing_quality_m',name:{ar:'جودة التشطيب النهائي',en:'Finishing Quality'},description:{ar:'الإتقان',en:'Craftsmanship'}, weight:10},
+                    {id:'attention_detail',   name:{ar:'الاهتمام بالتفاصيل الدقيقة',en:'Attention to Detail'},description:{ar:'الدقة',en:'Precision'}, weight:10},
+                    {id:'treatment_quality',  name:{ar:'جودة المعالجات النهائية',en:'Treatment Quality'},description:{ar:'الإتقان الفني',en:'Technical craftsmanship'}, weight:10},
+                    {id:'safety_finishing',   name:{ar:'التعامل الآمن مع مواد التشطيب',en:'Safe Material Handling'},description:{ar:'الوعي بالسلامة',en:'Safety awareness'}, weight:10},
+                    {id:'surface_protection', name:{ar:'الحفاظ على السطح من الخدوش',en:'Surface Protection'},description:{ar:'الحرص والانتباه',en:'Care and attention'}, weight:10},
+                    {id:'finishing_speed',    name:{ar:'سرعة إنجاز التشطيب',en:'Finishing Speed'},description:{ar:'الكفاءة',en:'Efficiency'}, weight:10},
+                    {id:'final_inspection',   name:{ar:'الفحص النهائي للجودة',en:'Final Inspection'},description:{ar:'مراقبة الجودة',en:'Quality control'}, weight:10}
                 ]
             }
         }
@@ -1759,6 +1806,7 @@ class EvaluationApp {
             'instructionDurationTitle','instructionDurationText',
             'instructionConfidentialTitle','instructionConfidentialText',
             'instructionAutoSendTitle','instructionAutoSendText',
+            'instructionScoringTitle','instructionScoringText',
             'settingsTitle','departmentLabel','employeeLabel','supervisorLabel','dateLabel','generateButtonText',
             'departmentSelect','employeeSelect','supervisorSelect','evaluationDate','generateAndSend',
             'notesTitle','notesText','generalNotesLabel','departmentNotesLabel','overallNotesLabel',
@@ -1773,8 +1821,12 @@ class EvaluationApp {
             'printSignatureDate1','printSignatureDate2','printSignatureDate3',
             'notification','notificationTitle','notificationMessage',
             'generalCriteriaBody','departmentCriteria','generalScore','departmentScore',
+            'generalMaxLabel','departmentMaxLabel','departmentPointsBox',
+            'generalCompletionBadge','generalCompletionText','departmentCompletionBadge','departmentCompletionText',
+            'departmentRatingLegend',
             'summaryCard','summaryGeneral','summaryDepartment','summaryPercentage','summaryGrade','summaryMessage',
-            'finalScore','scoreGrade','performanceTips','scoreProgress','totalScoreDisplay',
+            'summaryGeneralSubtext','summaryDepartmentSubtext','summaryPercentageSubtext','summaryTotalMax',
+            'finalScore','finalMaxLabel','scoreGrade','performanceTips','scoreProgress','totalScoreDisplay',
             'logoModalTitle','logoPreviewTitle','logoCancelText','logoSaveText'
         ];
         this.el = {};
@@ -1801,7 +1853,7 @@ class EvaluationApp {
 
     bindEvents() {
         this.el.departmentSelect.addEventListener('change', () => this.onDepartmentChange());
-        this.el.employeeSelect.addEventListener('change', () => { this.state.currentEmployee = this.el.employeeSelect.value; this.renderDepartmentCriteria(); });
+        this.el.employeeSelect.addEventListener('change', () => { this.state.currentEmployee = this.el.employeeSelect.value; this.state.ratings.department = new Map(); this.renderDepartmentCriteria(); });
         this.el.supervisorSelect.addEventListener('change', () => { this.state.currentSupervisor = this.el.supervisorSelect.value; });
         this.el.evaluationDate.addEventListener('change', () => { this.state.evaluationDate = this.el.evaluationDate.value; });
         this.el.generateAndSend.addEventListener('click', () => this.generateAndSendReport());
@@ -1866,6 +1918,9 @@ class EvaluationApp {
         });
     }
 
+    // ------------------------------------------------------------
+    // RENDERING — CRITERIA TABLES (with cleaned-up single description column)
+    // ------------------------------------------------------------
     renderGeneralCriteria() {
         const lang = this.state.currentLanguage;
         this.el.generalCriteriaBody.innerHTML = '';
@@ -1873,20 +1928,29 @@ class EvaluationApp {
             const rating     = this.state.ratings.general.get(c.id) || 0;
             const calculated = rating > 0 ? ((rating / 5) * c.weight).toFixed(1) : '0.0';
             const row = document.createElement('tr');
+            row.className = rating > 0 ? '' : 'unrated-row';
             row.innerHTML = `
-                <td><div class="criteria-name">${c.name[lang]}</div><div class="criteria-description">${c.description[lang]}</div></td>
-                <td>${c.description[lang]}</td>
+                <td><div class="criteria-name">${c.name[lang]}</div></td>
+                <td><div class="criteria-description">${c.description[lang]}</div></td>
                 <td style="text-align:center;"><span class="weight-badge">${c.weight}</span></td>
                 <td>
                     <div class="rating-controls" data-criterion-id="${c.id}" data-criterion-type="general">
-                        ${[1,2,3,4,5].map(n=>`<div class="rating-btn ${rating===n?'selected':''}" data-value="${n}">${n}</div>`).join('')}
+                        ${[1,2,3,4,5].map(n=>`<div class="rating-btn ${rating===n?'selected':''}" data-value="${n}" title="${this.ratingLabel(n)}">${n}</div>`).join('')}
                         <span class="printed-rating" style="display:none;">${rating>0?rating:'-'}</span>
                     </div>
                 </td>
-                <td style="text-align:center;"><span class="calculated-value">${calculated}</span></td>`;
+                <td style="text-align:center;"><span class="calculated-value ${rating>0?'':'empty'}">${calculated}</span></td>`;
             this.el.generalCriteriaBody.appendChild(row);
         });
         this.bindRatingEvents();
+        this.updateCompletionBadges();
+    }
+
+    ratingLabel(n) {
+        const lang = this.state.currentLanguage;
+        const labelsAr = {1:'ضعيف جداً',2:'ضعيف',3:'مقبول',4:'جيد',5:'ممتاز'};
+        const labelsEn = {1:'Very Weak',2:'Weak',3:'Acceptable',4:'Good',5:'Excellent'};
+        return lang === 'ar' ? labelsAr[n] : labelsEn[n];
     }
 
     renderDepartmentCriteria() {
@@ -1901,13 +1965,23 @@ class EvaluationApp {
                     <h3 style="margin-bottom:10px;">${TRANSLATIONS[lang].selectPromptTitle}</h3>
                     <p>${TRANSLATIONS[lang].selectPromptText}</p>
                 </div>`;
-            this.hideSummary(); return;
+            this.el.departmentPointsBox.style.display = 'none';
+            this.el.departmentCompletionBadge.style.display = 'none';
+            this.el.departmentRatingLegend.style.display = 'none';
+            this.hideSummary();
+            return;
         }
 
         const criteria = this.getDepartmentCriteria(deptId, this.state.currentEmployee, lang);
+        const deptMax  = criteria.length * 10;
+        this.el.departmentMaxLabel.textContent = deptMax;
+        this.el.departmentPointsBox.style.display = criteria.length ? 'block' : 'none';
+        this.el.departmentRatingLegend.style.display = criteria.length ? 'flex' : 'none';
+        this.el.departmentCompletionBadge.style.display = criteria.length ? 'inline-flex' : 'none';
+
         let html = `<table class="criteria-table"><thead><tr>
             <th width="30%">المعيار</th><th width="35%">الوصف</th>
-            <th width="10%">الوزن</th><th width="15%">التقييم</th><th width="10%">القيمة</th>
+            <th width="10%">الوزن</th><th width="15%">التقييم (1-5)</th><th width="10%">القيمة</th>
             </tr></thead><tbody>`;
 
         if (criteria.length === 0) {
@@ -1920,23 +1994,24 @@ class EvaluationApp {
             criteria.forEach(c => {
                 const rating     = this.state.ratings.department.get(c.id) || 0;
                 const calculated = rating > 0 ? ((rating / 5) * 10).toFixed(1) : '0.0';
-                html += `<tr>
-                    <td><div class="criteria-name">${c.name[lang]}</div>${c.description?`<div class="criteria-description">${c.description[lang]||''}</div>`:''}</td>
-                    <td>${c.description?(c.description[lang]||''):''}</td>
+                html += `<tr class="${rating>0?'':'unrated-row'}">
+                    <td><div class="criteria-name">${c.name[lang]}</div></td>
+                    <td><div class="criteria-description">${c.description ? (c.description[lang]||'') : ''}</div></td>
                     <td style="text-align:center;"><span class="weight-badge">10</span></td>
                     <td>
                         <div class="rating-controls" data-criterion-id="${c.id}" data-criterion-type="department">
-                            ${[1,2,3,4,5].map(n=>`<div class="rating-btn ${rating===n?'selected':''}" data-value="${n}">${n}</div>`).join('')}
+                            ${[1,2,3,4,5].map(n=>`<div class="rating-btn ${rating===n?'selected':''}" data-value="${n}" title="${this.ratingLabel(n)}">${n}</div>`).join('')}
                             <span class="printed-rating" style="display:none;">${rating>0?rating:'-'}</span>
                         </div>
                     </td>
-                    <td style="text-align:center;"><span class="calculated-value">${calculated}</span></td>
+                    <td style="text-align:center;"><span class="calculated-value ${rating>0?'':'empty'}">${calculated}</span></td>
                 </tr>`;
             });
         }
         html += `</tbody></table>`;
         this.el.departmentCriteria.innerHTML = html;
         this.bindRatingEvents();
+        this.updateCompletionBadges();
         this.updateScores();
     }
 
@@ -1989,14 +2064,17 @@ class EvaluationApp {
                     const pr = container.querySelector('.printed-rating');
                     if (pr) pr.textContent = value;
                     const row = e.target.closest('tr');
+                    row?.classList.remove('unrated-row');
                     const cv  = row?.querySelector('.calculated-value');
                     if (cv) {
                         const criterion = this.getCriterionById(type, cid);
                         if (criterion) {
                             const w = type === 'general' ? criterion.weight : 10;
                             cv.textContent = ((value / 5) * w).toFixed(1);
+                            cv.classList.remove('empty');
                         }
                     }
+                    this.updateCompletionBadges();
                     this.updateScores();
                 });
             });
@@ -2008,6 +2086,9 @@ class EvaluationApp {
         return this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee).find(c => c.id === cid);
     }
 
+    // ------------------------------------------------------------
+    // SCORING — accurate, dynamic maximums (no more hardcoded /85)
+    // ------------------------------------------------------------
     calculateScore(type, criteria) {
         let total = 0;
         criteria.forEach(c => {
@@ -2015,6 +2096,35 @@ class EvaluationApp {
             if (rating > 0) total += (rating / 5) * (type === 'general' ? c.weight : 10);
         });
         return Math.round(total * 100) / 100;
+    }
+
+    getGeneralMax() {
+        return ORGANIZATION_DATA.general.reduce((sum, c) => sum + c.weight, 0);
+    }
+
+    getDepartmentMax() {
+        const criteria = this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee);
+        return criteria.length * 10;
+    }
+
+    countRated(type, criteria) {
+        return criteria.filter(c => this.state.ratings[type].has(c.id)).length;
+    }
+
+    updateCompletionBadges() {
+        const genCriteria  = ORGANIZATION_DATA.general;
+        const genRated     = this.countRated('general', genCriteria);
+        this.el.generalCompletionText.textContent = `${genRated}/${genCriteria.length}`;
+        this.el.generalCompletionBadge.classList.toggle('complete', genRated === genCriteria.length && genCriteria.length > 0);
+        this.el.generalCompletionBadge.classList.toggle('incomplete', genRated < genCriteria.length);
+
+        const deptCriteria = this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee);
+        if (deptCriteria.length > 0) {
+            const deptRated = this.countRated('department', deptCriteria);
+            this.el.departmentCompletionText.textContent = `${deptRated}/${deptCriteria.length}`;
+            this.el.departmentCompletionBadge.classList.toggle('complete', deptRated === deptCriteria.length);
+            this.el.departmentCompletionBadge.classList.toggle('incomplete', deptRated < deptCriteria.length);
+        }
     }
 
     getGrade(pct) {
@@ -2027,21 +2137,33 @@ class EvaluationApp {
     }
 
     updateScores() {
-        const genScore  = this.calculateScore('general', ORGANIZATION_DATA.general);
-        const deptCrit  = this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee);
-        const deptScore = this.calculateScore('department', deptCrit);
-        const total     = genScore + deptScore;
-        const pct       = Math.round((total / 100) * 100);
-        const grade     = this.getGrade(pct);
+        const generalMax   = this.getGeneralMax();
+        const deptCriteria = this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee);
+        const deptMax       = deptCriteria.length * 10;
+        const totalMax      = generalMax + deptMax;
 
-        this.el.generalScore.textContent     = genScore.toFixed(2);
-        this.el.departmentScore.textContent  = deptScore.toFixed(2);
-        this.el.summaryGeneral.textContent   = `${genScore.toFixed(2)}/40`;
-        this.el.summaryDepartment.textContent= `${deptScore.toFixed(2)}/85`;
-        this.el.summaryPercentage.textContent= `${pct}%`;
-        this.el.summaryGrade.textContent     = grade.name;
-        this.el.summaryMessage.textContent   = grade.message;
-        this.el.finalScore.textContent       = total.toFixed(2);
+        const genScore  = this.calculateScore('general', ORGANIZATION_DATA.general);
+        const deptScore = this.calculateScore('department', deptCriteria);
+        const total      = Math.round((genScore + deptScore) * 100) / 100;
+        const pct        = totalMax > 0 ? Math.min(100, Math.round((total / totalMax) * 1000) / 10) : 0;
+        const grade      = this.getGrade(pct);
+
+        this.el.generalScore.textContent      = genScore.toFixed(1);
+        this.el.generalMaxLabel.textContent    = generalMax;
+        this.el.departmentScore.textContent    = deptScore.toFixed(1);
+        this.el.departmentMaxLabel.textContent = deptMax;
+
+        this.el.summaryGeneral.textContent        = `${genScore.toFixed(1)}/${generalMax}`;
+        this.el.summaryGeneralSubtext.textContent = this.state.currentLanguage === 'ar' ? `من ${generalMax} نقطة` : `out of ${generalMax} points`;
+        this.el.summaryDepartment.textContent        = `${deptScore.toFixed(1)}/${deptMax}`;
+        this.el.summaryDepartmentSubtext.textContent = this.state.currentLanguage === 'ar' ? `من ${deptMax} نقطة` : `out of ${deptMax} points`;
+        this.el.summaryPercentage.textContent     = `${pct}%`;
+        this.el.summaryTotalMax.textContent       = totalMax;
+        this.el.summaryGrade.textContent          = grade.name;
+        this.el.summaryMessage.textContent        = grade.message;
+
+        this.el.finalScore.textContent       = total.toFixed(1);
+        this.el.finalMaxLabel.textContent    = totalMax;
         this.el.scoreGrade.textContent       = `${grade.name} - ${grade.message}`;
         this.el.performanceTips.textContent  = grade.message;
         this.el.scoreProgress.style.width    = `${pct}%`;
@@ -2058,11 +2180,32 @@ class EvaluationApp {
         this.el.totalScoreDisplay.style.display = 'none';
     }
 
+    // ------------------------------------------------------------
+    // VALIDATION — require full rating completion for accuracy
+    // ------------------------------------------------------------
     validateForm() {
-        const lang = this.state.currentLanguage;
         if (!this.state.currentDepartment) { this.showNotification('error','خطأ','يرجى اختيار القسم'); return false; }
         if (!this.state.currentEmployee)   { this.showNotification('error','خطأ','يرجى اختيار الموظف'); return false; }
         if (!this.state.currentSupervisor) { this.showNotification('error','خطأ','يرجى اختيار المشرف'); return false; }
+
+        const genCriteria  = ORGANIZATION_DATA.general;
+        const genRated     = this.countRated('general', genCriteria);
+        if (genRated < genCriteria.length) {
+            this.showNotification('error','تقييم غير مكتمل', `يرجى تقييم جميع المعايير العامة أولاً (${genRated}/${genCriteria.length} مكتملة)`);
+            return false;
+        }
+
+        const deptCriteria = this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee);
+        if (deptCriteria.length === 0) {
+            this.showNotification('error','خطأ','لا توجد معايير قسم متاحة لهذا الموظف، يرجى التواصل مع الموارد البشرية');
+            return false;
+        }
+        const deptRated = this.countRated('department', deptCriteria);
+        if (deptRated < deptCriteria.length) {
+            this.showNotification('error','تقييم غير مكتمل', `يرجى تقييم جميع معايير القسم أولاً (${deptRated}/${deptCriteria.length} مكتملة)`);
+            return false;
+        }
+
         return true;
     }
 
@@ -2093,11 +2236,15 @@ class EvaluationApp {
         this.el.printSignatureDate2.textContent = today;
         this.el.printSignatureDate3.textContent = today;
 
-        const genScore  = parseFloat(this.el.generalScore.textContent);
-        const deptScore = parseFloat(this.el.departmentScore.textContent);
-        const total     = genScore + deptScore;
-        const grade     = this.getGrade(Math.round((total / 100) * 100));
-        this.el.printTotalScore.textContent = `${total.toFixed(1)}/100`;
+        const generalMax = this.getGeneralMax();
+        const deptMax     = this.getDepartmentMax();
+        const totalMax    = generalMax + deptMax;
+        const genScore    = parseFloat(this.el.generalScore.textContent);
+        const deptScore   = parseFloat(this.el.departmentScore.textContent);
+        const total       = genScore + deptScore;
+        const pct         = totalMax > 0 ? Math.min(100, Math.round((total / totalMax) * 1000) / 10) : 0;
+        const grade       = this.getGrade(pct);
+        this.el.printTotalScore.textContent = `${total.toFixed(1)}/${totalMax} (${pct}%)`;
         this.el.printGradeInfo.textContent  = `${grade.name} - ${grade.message}`;
 
         const trunc = (t, n=150) => !t ? (lang==='ar'?'لا توجد ملاحظات':'No notes') : (t.length>n?t.slice(0,n)+'...':t);
@@ -2122,10 +2269,13 @@ class EvaluationApp {
         const empOpt = this.el.employeeSelect.options[this.el.employeeSelect.selectedIndex];
         const supOpt = this.el.supervisorSelect.options[this.el.supervisorSelect.selectedIndex];
         const dept   = ORGANIZATION_DATA.departments[this.state.currentDepartment];
+        const generalMax = this.getGeneralMax();
+        const deptMax     = this.getDepartmentMax();
+        const totalMax    = generalMax + deptMax;
         const genScore  = parseFloat(this.el.generalScore.textContent);
         const deptScore = parseFloat(this.el.departmentScore.textContent);
         const total     = genScore + deptScore;
-        const pct       = Math.round((total / 100) * 100);
+        const pct       = totalMax > 0 ? Math.min(100, Math.round((total / totalMax) * 1000) / 10) : 0;
         const grade     = this.getGrade(pct);
         return {
             employee: empOpt ? empOpt.textContent : '',
@@ -2133,8 +2283,8 @@ class EvaluationApp {
             supervisor: supOpt ? supOpt.textContent : '',
             evaluator: currentUser ? currentUser.name : '',
             date: this.state.evaluationDate,
-            generalScore: genScore, departmentScore: deptScore,
-            totalScore: total, percentage: pct,
+            generalScore: genScore, generalMax, departmentScore: deptScore, departmentMax: deptMax,
+            totalScore: total, totalMax, percentage: pct,
             grade: grade.name, gradeMessage: grade.message,
             notes: this.state.notes
         };
@@ -2151,9 +2301,9 @@ class EvaluationApp {
 📅 *التاريخ:* ${d.date}
 ----------------------------
 📈 *النتائج:*
-• المعايير العامة: ${d.generalScore}/40
-• معايير القسم: ${d.departmentScore}/85
-• الإجمالي: ${d.totalScore.toFixed(2)}/100
+• المعايير العامة: ${d.generalScore.toFixed(1)}/${d.generalMax}
+• معايير القسم: ${d.departmentScore.toFixed(1)}/${d.departmentMax}
+• الإجمالي: ${d.totalScore.toFixed(1)}/${d.totalMax}
 • النسبة: ${d.percentage}%
 • التقدير: ${d.grade} - ${d.gradeMessage}
 ----------------------------
