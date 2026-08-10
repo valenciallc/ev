@@ -6,6 +6,11 @@
     <title>النموذج الموحد للتقييم - شركة فالنسيا للرخام والحجر الطبيعي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- إضافة مكتبات الـ PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- html2canvas: يسمح بتوليد PDF عربي سليم عبر تحويل HTML إلى صورة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* ========== RESET & BASE ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -107,6 +112,23 @@
             from { opacity:0; transform: translateY(40px) scale(0.95); }
             to   { opacity:1; transform: translateY(0) scale(1); }
         }
+
+        .login-lang-toggle {
+            position: absolute;
+            top: 16px;
+            inset-inline-end: 16px;
+            z-index: 2;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .login-lang-toggle:hover { background: rgba(255,255,255,0.22); }
 
         .login-logo {
             width: 80px;
@@ -739,6 +761,87 @@
             color: var(--primary-dark);
             margin-right: 10px;
         }
+
+        /* ========================================================
+           ARCHIVE (سجل التقييمات)
+        ======================================================== */
+        .archive-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+        .btn-archive {
+            background: linear-gradient(to right, var(--primary), var(--gold));
+            color: white; border: none; padding: 13px 26px;
+            border-radius: 6px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 15px rgba(139,115,85,0.3);
+            font-family: 'Cairo', sans-serif;
+        }
+        .btn-archive:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(139,115,85,0.4); }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 3000;
+            background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+            backdrop-filter: blur(5px); padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white; border-radius: var(--radius); width: 100%; max-width: 980px;
+            max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+            animation: modalFadeIn 0.3s ease-out; padding: 24px;
+        }
+        .modal-box.wide { max-width: 1100px; }
+        .modal-title {
+            color: var(--secondary); font-size: 1.4rem; font-weight: 700;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+            border-bottom: 2px solid var(--gray-light); padding-bottom: 14px;
+        }
+        .modal-title i { color: var(--primary); }
+        .archive-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .archive-table th { background: var(--light); padding: 10px; text-align: right; color: var(--secondary); border-bottom: 2px solid var(--gray-light); white-space: nowrap; }
+        .archive-table td { padding: 10px; border-bottom: 1px solid var(--gray-light); vertical-align: middle; }
+        .archive-table tr:hover { background: #f9f9f9; }
+        .archive-empty { text-align: center; padding: 50px 20px; color: var(--gray); }
+        .archive-empty i { font-size: 3rem; margin-bottom: 15px; opacity: 0.4; }
+        .btn-sm {
+            padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;
+            font-size: 0.82rem; font-family: 'Cairo', sans-serif; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-sm.view   { background: #e3f2fd; color: var(--secondary); }
+        .btn-sm.pdf    { background: #e8f5e9; color: var(--success); }
+        .btn-sm.delete { background: #ffebee; color: var(--danger); }
+        .btn-sm:hover  { transform: translateY(-1px); filter: brightness(0.95); }
+        .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .grade-pill {
+            padding: 3px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: white;
+        }
+
+        /* ========================================================
+           PDF REPORT CONTAINER (مخفي، يُستخدم لتوليد PDF عربي سليم)
+        ======================================================== */
+        #pdfReport {
+            position: absolute; left: -99999px; top: 0; width: 794px; /* A4 width at 96dpi */
+            background: white; color: #1a1a2e; font-family: 'Cairo', 'Tajawal', sans-serif;
+            padding: 30px; line-height: 1.6; z-index: -1;
+        }
+        #pdfReport .pdf-company-header { text-align: center; border-bottom: 3px solid #8b7355; padding-bottom: 12px; margin-bottom: 16px; }
+        #pdfReport .pdf-company-header h1 { font-size: 22px; color: #6d5a42; margin-bottom: 4px; }
+        #pdfReport .pdf-company-header .sub { font-size: 13px; color: #2c3e50; }
+        #pdfReport .pdf-info-table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 12px; }
+        #pdfReport .pdf-info-table td, #pdfReport .pdf-info-table th { border: 1px solid #b9c2cc; padding: 6px 8px; }
+        #pdfReport .pdf-info-table th { background: #f0f0f0; width: 16%; }
+        #pdfReport .pdf-section-title { font-size: 15px; font-weight: 700; color: #2c3e50; background: #eef3f8; padding: 6px 10px; margin: 12px 0 6px; border-right: 4px solid #8b7355; }
+        #pdfReport .pdf-criteria-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px; }
+        #pdfReport .pdf-criteria-table th, #pdfReport .pdf-criteria-table td { border: 1px solid #b9c2cc; padding: 5px 6px; text-align: center; }
+        #pdfReport .pdf-criteria-table th { background: #f0f0f0; color: #2c3e50; }
+        #pdfReport .pdf-criteria-table td.name, #pdfReport .pdf-criteria-table td.desc { text-align: right; }
+        #pdfReport .pdf-total { text-align: center; background: #eef9f1; border: 2px solid #27ae60; padding: 12px; margin: 14px 0; font-size: 16px; font-weight: 700; color: #1d7a45; border-radius: 6px; }
+        #pdfReport .pdf-notes { font-size: 12px; margin-top: 8px; }
+        #pdfReport .pdf-notes .nlabel { font-weight: 700; color: #2c3e50; }
+        #pdfReport .pdf-notes .nbox { border: 1px solid #b9c2cc; padding: 6px 8px; margin: 4px 0 10px; min-height: 18px; }
+        #pdfReport .pdf-signatures { display: flex; justify-content: space-between; gap: 20px; margin-top: 30px; }
+        #pdfReport .pdf-sig-box { flex: 1; border: 1px solid #2c3e50; padding: 14px; text-align: center; height: 110px; font-size: 12px; }
+        #pdfReport .pdf-sig-line { border-top: 1px solid #2c3e50; margin-top: 44px; padding-top: 6px; font-size: 11px; }
+        #pdfReport .pdf-footer { text-align: center; font-size: 10px; color: #7b8a99; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 8px; }
     </style>
 </head>
 <body>
@@ -752,11 +855,12 @@
     <div class="marble-shape"></div>
 
     <div class="login-card">
+        <button class="login-lang-toggle" id="loginLangSwitch" type="button">English</button>
         <div class="login-logo">
             <i class="fas fa-gem"></i>
         </div>
-        <div class="login-title">تسجيل الدخول</div>
-        <div class="login-subtitle">Valencia Marble & Natural Stone Company<br>نظام التقييم الموحد للموارد البشرية</div>
+        <div class="login-title" id="loginTitle">تسجيل الدخول</div>
+        <div class="login-subtitle" id="loginSubtitle">Valencia Marble & Natural Stone Company<br>نظام التقييم الموحد للموارد البشرية</div>
 
         <div class="login-error" id="loginError">
             <i class="fas fa-exclamation-triangle"></i>
@@ -764,11 +868,11 @@
         </div>
 
         <div class="login-field">
-            <label><i class="fas fa-building" style="margin-left:6px; color:rgba(255,255,255,0.5);"></i> القسم</label>
+            <label><i class="fas fa-building" style="margin-left:6px; color:rgba(255,255,255,0.5);"></i> <span id="loginDeptLabel">القسم</span></label>
             <div class="input-wrap">
                 <i class="fas fa-chevron-down" style="font-size:0.8rem;"></i>
                 <select id="loginDept">
-                    <option value="">— اختر قسمك —</option>
+                    <option value="">— <span id="loginDeptPlaceholder">اختر قسمك</span> —</option>
                     <option value="hr">👑 الموارد البشرية (مدير عام)</option>
                     <option value="sales">🛍️ قسم المبيعات</option>
                     <option value="finance">💰 قسم المحاسبة/المالية</option>
@@ -777,12 +881,13 @@
                     <option value="design">🎨 قسم التصميم</option>
                     <option value="marketing">📱 قسم التسويق الإلكتروني</option>
                     <option value="projects">🔨 قسم المشاريع</option>
+                    <option value="marble">💎 قسم الرخام</option>
                 </select>
             </div>
         </div>
 
         <div class="login-field">
-            <label><i class="fas fa-user" style="margin-left:6px; color:rgba(255,255,255,0.5);"></i> اسم المستخدم</label>
+            <label><i class="fas fa-user" style="margin-left:6px; color:rgba(255,255,255,0.5);"></i> <span id="loginUsernameLabel">اسم المستخدم</span></label>
             <div class="input-wrap">
                 <i class="fas fa-user"></i>
                 <input type="text" id="loginUsername" placeholder="أدخل اسم المستخدم" autocomplete="off">
@@ -790,7 +895,7 @@
         </div>
 
         <div class="login-field">
-            <label><i class="fas fa-lock" style="margin-left:6px; color:rgba(255,255,255,0.5);"></i> كلمة المرور</label>
+            <label><i class="fas fa-lock" style="margin-left:6px; color:rgba(255,255,255,0.5);"></i> <span id="loginPasswordLabel">كلمة المرور</span></label>
             <div class="input-wrap">
                 <i class="fas fa-lock"></i>
                 <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور">
@@ -802,10 +907,10 @@
 
         <button class="btn-login" id="btnLogin">
             <i class="fas fa-sign-in-alt"></i>
-            دخول إلى النظام
+            <span id="loginBtnText">دخول إلى النظام</span>
         </button>
 
-        <div class="login-footer">
+        <div class="login-footer" id="loginFooterText">
             النظام الموحد للتقييم | جميع البيانات محمية
         </div>
     </div>
@@ -961,9 +1066,16 @@
         </div>
 
         <button id="generateAndSend" class="btn-generate">
-            <i class="fab fa-telegram"></i>
-            <span id="generateButtonText">طباعة وإرسال التقرير</span>
+            <i class="fas fa-file-pdf"></i>
+            <span id="generateButtonText">طباعة وإرسال PDF</span>
         </button>
+
+        <div class="archive-actions">
+            <button id="openArchiveBtn" class="btn-archive">
+                <i class="fas fa-archive"></i>
+                <span id="archiveButtonText">سجل التقييمات</span>
+            </button>
+        </div>
     </div>
 
     <!-- Notes -->
@@ -1117,6 +1229,52 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         سجل التقييمات (Archive Modal)
+    ============================================================ -->
+    <div class="modal-overlay" id="archiveModal">
+        <div class="modal-box wide">
+            <div class="modal-title"><i class="fas fa-archive"></i><span id="archiveModalTitle">سجل التقييمات</span></div>
+            <div style="text-align:left; margin-bottom:12px;">
+                <button class="btn-sm delete" id="clearArchiveBtn"><i class="fas fa-trash"></i> <span id="clearArchiveText">حذف الكل</span></button>
+            </div>
+            <div id="archiveList"><div class="archive-empty"><i class="fas fa-database"></i><h3 id="archiveEmptyTitle">لا توجد تقييمات محفوظة بعد</h3><p id="archiveEmptyText">عند إرسال أي تقييم سيتم حفظه هنا تلقائياً</p></div></div>
+            <div style="display:flex; justify-content:center; margin-top:18px;">
+                <button class="btn-archive" id="closeArchiveBtn"><i class="fas fa-times"></i><span id="closeArchiveText">إغلاق</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         عرض تقييم محفوظ (View Modal)
+    ============================================================ -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal-box wide">
+            <div class="modal-title"><i class="fas fa-eye"></i><span id="viewModalTitle">تفاصيل التقييم</span></div>
+            <div id="viewContent"></div>
+            <div style="display:flex; justify-content:center; gap:12px; margin-top:18px; flex-wrap:wrap;">
+                <button class="btn-generate" style="margin:0; max-width:220px;" id="viewReprintBtn"><i class="fas fa-file-pdf"></i> <span id="viewReprintText">طباعة التقييم</span></button>
+                <button class="btn-archive" id="viewCloseBtn"><i class="fas fa-times"></i><span id="viewCloseText">إغلاق</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         حاوية تقرير PDF (مخفية - تُملأ عند الطباعة لتوليد PDF عربي سليم)
+    ============================================================ -->
+    <div id="pdfReport" dir="rtl">
+        <div class="pdf-company-header">
+            <h1 id="pdfReportTitle">تقرير التقييم الموحد</h1>
+            <div class="sub">شركة فالنسيا للرخام والحجر الطبيعي - Valencia Marble &amp; Natural Stone Company</div>
+        </div>
+        <table class="pdf-info-table" id="pdfInfoTable"></table>
+        <div id="pdfCriteria"></div>
+        <div class="pdf-total" id="pdfTotal"></div>
+        <div class="pdf-notes" id="pdfNotes"></div>
+        <div class="pdf-signatures" id="pdfSignatures"></div>
+        <div class="pdf-footer" id="pdfFooter">تم إنشاء هذا التقرير تلقائياً من نظام التقييم الموحد - الموارد البشرية</div>
+    </div>
+
     <!-- Notification -->
     <div id="notification" class="notification">
         <div class="notification-icon"><i class="fas fa-check-circle"></i></div>
@@ -1172,6 +1330,9 @@ const USERS = [
 
     // Projects
     { username: 'mamoun',   password: 'Projects@2026',     dept: 'projects',  name: 'مامون أحمد حجازي',      role: 'مسؤول قسم المشاريع',     deptLabel: 'قسم المشاريع' },
+
+    // Marble
+    { username: 'anas',     password: 'Marble@2026',       dept: 'marble',    name: 'أنس محمد السرداني',     role: 'مسؤول قسم الرخام',       deptLabel: 'قسم الرخام' },
 ];
 
 // ============================================================
@@ -1186,40 +1347,48 @@ function login() {
     const errEl    = document.getElementById('loginError');
     const errTxt   = document.getElementById('loginErrorText');
 
+    // إخفاء أي خطأ سابق
+    errEl.classList.remove('show');
+
+    // التحقق من الحقول
     if (!dept) {
-        errTxt.textContent = 'يرجى اختيار القسم أولاً';
+        errTxt.textContent = '⚠️ يرجى اختيار القسم أولاً';
         errEl.classList.add('show');
         return;
     }
     if (!username || !password) {
-        errTxt.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور';
+        errTxt.textContent = '⚠️ يرجى إدخال اسم المستخدم وكلمة المرور';
         errEl.classList.add('show');
         return;
     }
 
+    // البحث عن المستخدم
     const user = USERS.find(u =>
-        u.username === username &&
+        u.username.toLowerCase() === username.toLowerCase() && // تجاهل حالة الأحرف
         u.password === password &&
         (u.dept === dept || u.dept === 'hr')
     );
 
     if (!user) {
-        errTxt.textContent = 'بيانات الدخول غير صحيحة أو القسم لا يتطابق';
+        errTxt.textContent = '❌ اسم المستخدم أو كلمة المرور غير صحيحة، أو القسم غير متطابق';
         errEl.classList.add('show');
-        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').value = ''; // مسح كلمة المرور
+        console.warn('محاولة دخول فاشلة:', { username, dept });
         return;
     }
 
-    // Check dept match (hr can login from any selection)
+    // التحقق من تطابق القسم (للمستخدمين غير الـ HR)
     if (user.dept !== 'hr' && user.dept !== dept) {
-        errTxt.textContent = 'القسم المختار لا يتطابق مع صلاحياتك';
+        errTxt.textContent = '❌ هذا المستخدم ليس لديه صلاحية للقسم المختار';
         errEl.classList.add('show');
         return;
     }
 
+    // نجاح الدخول
     currentUser = user;
     errEl.classList.remove('show');
     showApp();
+    console.log('✅ تم تسجيل الدخول بنجاح:', currentUser.name);
 }
 
 function logout() {
@@ -1308,6 +1477,10 @@ document.getElementById('passToggle').addEventListener('click', () => {
 const TRANSLATIONS = {
     ar: {
         headerTitle:'النموذج الموحد للتقييم', companyName:'Valencia Marble & Natural Stone Company', langText:'English',
+        loginTitle:'تسجيل الدخول', loginSubtitle:'Valencia Marble & Natural Stone Company<br>نظام التقييم الموحد للموارد البشرية',
+        loginDeptLabel:'القسم', loginDeptPlaceholder:'اختر قسمك', loginUsernameLabel:'اسم المستخدم', loginPasswordLabel:'كلمة المرور',
+        loginBtnText:'دخول إلى النظام', loginFooterText:'النظام الموحد للتقييم | جميع البيانات محمية',
+        loginUsernamePlaceholder:'أدخل اسم المستخدم', loginPasswordPlaceholder:'أدخل كلمة المرور',
         logoModalTitle:'رفع شعار الشركة', logoUploadText:'انقر أو اسحب الصورة هنا', logoUploadSubtext:'الحجم الموصى به: 200x200 بكسل • الصيغ المدعومة: JPG, PNG, SVG', logoPreviewTitle:'معاينة الشعار', logoCancelText:'إلغاء', logoSaveText:'حفظ الشعار',
         instructionsTitle:'تعليمات التقييم', instructionsText:'يرجى قراءة التعليمات التالية بعناية قبل البدء في عملية التقييم:',
         instructionPrincipleTitle:'مبدأ التقييم:', instructionPrincipleText:'يتم تقييم كل موظف بناءً على معايير محددة تتناسب مع طبيعة عمله',
@@ -1315,21 +1488,35 @@ const TRANSLATIONS = {
         instructionConfidentialTitle:'سرية المعلومات:', instructionConfidentialText:'جميع نتائج التقييم سرية وتحفظ في سجلات الموارد البشرية',
         instructionAutoSendTitle:'الإرسال التلقائي:', instructionAutoSendText:'يتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة',
         instructionScoringTitle:'آلية الاحتساب:', instructionScoringText:'كل معيار يُقيَّم من 1 إلى 5، وتُحسب النتيجة النهائية كنسبة مئوية دقيقة من مجموع نقاط المعايير الفعلية (العامة + الخاصة بالقسم)، ولا يمكن إرسال التقرير قبل تقييم جميع المعايير الظاهرة',
-        settingsTitle:'إعدادات التقييم', departmentLabel:'القسم', employeeLabel:'الموظف', supervisorLabel:'المشرف المباشر', dateLabel:'تاريخ التقييم', generateButtonText:'طباعة وإرسال التقرير',
+        settingsTitle:'إعدادات التقييم', departmentLabel:'القسم', employeeLabel:'الموظف', supervisorLabel:'المشرف المباشر', dateLabel:'تاريخ التقييم', generateButtonText:'طباعة وإرسال PDF',
+        archiveButtonText:'سجل التقييمات', archiveModalTitle:'سجل التقييمات المحفوظة', clearArchiveText:'حذف الكل', closeArchiveText:'إغلاق',
+        archiveEmptyTitle:'لا توجد تقييمات محفوظة بعد', archiveEmptyText:'عند إرسال أي تقييم سيتم حفظه هنا تلقائياً',
+        viewModalTitle:'تفاصيل التقييم', viewReprintText:'طباعة التقييم', viewCloseText:'إغلاق',
+        tableHeaderCriterion:'المعيار', tableHeaderDescription:'الوصف', tableHeaderWeight:'الوزن', tableHeaderRating:'التقييم (1-5)', tableHeaderValue:'القيمة',
+        pointsLabel:'النقاط', deptLockText:'مقيّد بقسمك',
+        noDeptCriteriaTitle:'لا توجد معايير مخصصة لهذا الموظف', noDeptCriteriaText:'يرجى التواصل مع إدارة الموارد البشرية',
+        archiveThId:'#', archiveThEmployee:'الموظف', archiveThDept:'القسم', archiveThDate:'التاريخ', archiveThScore:'النتيجة', archiveThGrade:'التقدير', archiveThActions:'إجراءات',
+        btnView:'عرض', btnPrint:'طباعة', btnDelete:'حذف',
         generalCriteriaTitle:'المعايير العامة المشتركة', departmentCriteriaTitle:'معايير القسم',
         selectPromptTitle:'اختر القسم والموظف', selectPromptText:'يرجى اختيار القسم والموظف من أعلى الصفحة لعرض معايير التقييم الخاصة به',
         summaryTitle:'ملخص النتائج', summaryGeneralLabel:'المعايير العامة', summaryDepartmentLabel:'معايير القسم', summaryPercentageLabel:'النسبة المئوية', summaryGradeLabel:'التقدير',
         totalScoreLabel:'النتيجة الإجمالية للتقييم',
         notesTitle:'ملاحظات التقييم', notesText:'يرجى كتابة الملاحظات الخاصة بكل قسم من أقسام التقييم:',
         generalNotesLabel:'ملاحظات المعايير العامة', departmentNotesLabel:'ملاحظات معايير القسم', overallNotesLabel:'ملاحظات عامة وتوصيات',
+        generalNotesPlaceholder:'اكتب ملاحظاتك حول المعايير العامة هنا...', departmentNotesPlaceholder:'اكتب ملاحظاتك حول معايير القسم هنا...', overallNotesPlaceholder:'اكتب الملاحظات العامة والتوصيات هنا...',
         printNotesTitle:'ملاحظات التقييم', printGeneralNotesLabel:'ملاحظات المعايير العامة:', printDepartmentNotesLabel:'ملاحظات معايير القسم:', printOverallNotesLabel:'ملاحظات عامة وتوصيات:',
         printReportTitle:'تقرير التقييم الموحد', printInfoTitle:'معلومات التقييم',
         printEmployeeLabel:'الموظف:', printDepartmentLabel:'القسم:', printSupervisorLabel:'المشرف المباشر:', printDateLabel:'تاريخ التقييم:', printTotalScoreLabel:'النتيجة الإجمالية:', printGradeLabel:'التقدير:',
         signaturesTitle:'التوقيعات', employeeSignatureTitle:'توقيع الموظف المقيَّم', supervisorSignatureTitle:'توقيع المشرف المباشر', hrSignatureTitle:'توقيع الموارد البشرية',
+        selectEmployeePlaceholder:'-- اختر الموظف --', selectSupervisorPlaceholder:'-- اختر المشرف --', selectDepartmentPlaceholder:'-- اختر قسمًا --',
         copyrightText:'© 2026 Valencia Marble & Natural Stone Company - جميع الحقوق محفوظة',
     },
     en: {
         headerTitle:'Unified Evaluation Form', companyName:'Valencia Marble & Natural Stone Company', langText:'العربية',
+        loginTitle:'Sign In', loginSubtitle:'Valencia Marble & Natural Stone Company<br>Unified HR Evaluation System',
+        loginDeptLabel:'Department', loginDeptPlaceholder:'Select your department', loginUsernameLabel:'Username', loginPasswordLabel:'Password',
+        loginBtnText:'Sign In', loginFooterText:'Unified Evaluation System | All data is protected',
+        loginUsernamePlaceholder:'Enter username', loginPasswordPlaceholder:'Enter password',
         logoModalTitle:'Upload Company Logo', logoUploadText:'Click or drag image here', logoUploadSubtext:'Recommended size: 200x200px • Supported: JPG, PNG, SVG', logoPreviewTitle:'Logo Preview', logoCancelText:'Cancel', logoSaveText:'Save Logo',
         instructionsTitle:'Evaluation Instructions', instructionsText:'Please read the following instructions carefully before starting:',
         instructionPrincipleTitle:'Evaluation Principle:', instructionPrincipleText:'Each employee is evaluated based on specific criteria matching their job',
@@ -1337,28 +1524,98 @@ const TRANSLATIONS = {
         instructionConfidentialTitle:'Confidentiality:', instructionConfidentialText:'All results are confidential and kept in HR records',
         instructionAutoSendTitle:'Auto Send:', instructionAutoSendText:'A copy is automatically sent to the HR channel upon printing',
         instructionScoringTitle:'Scoring Method:', instructionScoringText:'Each criterion is rated from 1 to 5. The final score is calculated as an accurate percentage of the actual total possible points (general + department-specific), and the report cannot be sent until all visible criteria are rated',
-        settingsTitle:'Evaluation Settings', departmentLabel:'Department', employeeLabel:'Employee', supervisorLabel:'Direct Supervisor', dateLabel:'Evaluation Date', generateButtonText:'Print and Send Report',
+        settingsTitle:'Evaluation Settings', departmentLabel:'Department', employeeLabel:'Employee', supervisorLabel:'Direct Supervisor', dateLabel:'Evaluation Date', generateButtonText:'Print & Send PDF',
+        archiveButtonText:'Evaluation Records', archiveModalTitle:'Saved Evaluation Records', clearArchiveText:'Delete All', closeArchiveText:'Close',
+        archiveEmptyTitle:'No saved evaluations yet', archiveEmptyText:'Any evaluation you send will be saved here automatically',
+        viewModalTitle:'Evaluation Details', viewReprintText:'Print Evaluation', viewCloseText:'Close',
+        tableHeaderCriterion:'Criterion', tableHeaderDescription:'Description', tableHeaderWeight:'Weight', tableHeaderRating:'Rating (1-5)', tableHeaderValue:'Value',
+        pointsLabel:'Points', deptLockText:'Locked to your department',
+        noDeptCriteriaTitle:'No specific criteria for this employee', noDeptCriteriaText:'Please contact Human Resources',
+        archiveThId:'#', archiveThEmployee:'Employee', archiveThDept:'Department', archiveThDate:'Date', archiveThScore:'Score', archiveThGrade:'Grade', archiveThActions:'Actions',
+        btnView:'View', btnPrint:'Print', btnDelete:'Delete',
         generalCriteriaTitle:'General Shared Criteria', departmentCriteriaTitle:'Department Criteria',
         selectPromptTitle:'Select Department and Employee', selectPromptText:'Please select the department and employee above to display evaluation criteria',
         summaryTitle:'Results Summary', summaryGeneralLabel:'General Criteria', summaryDepartmentLabel:'Department Criteria', summaryPercentageLabel:'Percentage', summaryGradeLabel:'Grade',
         totalScoreLabel:'Total Evaluation Score',
         notesTitle:'Evaluation Notes', notesText:'Please write notes for each evaluation section:',
         generalNotesLabel:'General Criteria Notes', departmentNotesLabel:'Department Criteria Notes', overallNotesLabel:'Overall Notes and Recommendations',
+        generalNotesPlaceholder:'Write your notes on the general criteria here...', departmentNotesPlaceholder:'Write your notes on the department criteria here...', overallNotesPlaceholder:'Write overall notes and recommendations here...',
         printNotesTitle:'Evaluation Notes', printGeneralNotesLabel:'General Criteria Notes:', printDepartmentNotesLabel:'Department Criteria Notes:', printOverallNotesLabel:'Overall Notes and Recommendations:',
         printReportTitle:'Unified Evaluation Report', printInfoTitle:'Evaluation Information',
         printEmployeeLabel:'Employee:', printDepartmentLabel:'Department:', printSupervisorLabel:'Supervisor:', printDateLabel:'Date:', printTotalScoreLabel:'Total Score:', printGradeLabel:'Grade:',
         signaturesTitle:'Signatures', employeeSignatureTitle:'Employee Signature', supervisorSignatureTitle:'Supervisor Signature', hrSignatureTitle:'HR Signature',
+        selectEmployeePlaceholder:'-- Select Employee --', selectSupervisorPlaceholder:'-- Select Supervisor --', selectDepartmentPlaceholder:'-- Select Department --',
         copyrightText:'© 2026 Valencia Marble & Natural Stone Company - All Rights Reserved',
     }
 };
 
 // ============================================================
 // CONFIG
+// - بيانات تليجرام أصبحت على السيرفر فقط (api/api.php)
+// - إذا تغير مسار التشغيل عدّل API_BASE
 // ============================================================
 const CONFIG = {
-    BOT_TOKEN: "8211546767:AAHDBtxYSpF3WX2uq8l9d6D8oeCaiA2egjs",
-    HR_CHANNEL: "-1003528917325"
+    API_BASE: 'api/api.php'
 };
+
+// ============================================================
+// LOGIN SCREEN LANGUAGE
+// ============================================================
+let loginLang = 'ar';
+const LOGIN_DEPT_OPTIONS = {
+    hr:       { ar: '👑 الموارد البشرية (مدير عام)',        en: '👑 Human Resources (General Manager)' },
+    sales:    { ar: '🛍️ قسم المبيعات',                      en: '🛍️ Sales Department' },
+    finance:  { ar: '💰 قسم المحاسبة/المالية',               en: '💰 Accounting / Finance Department' },
+    vehicles: { ar: '🚚 قسم الآليات',                        en: '🚚 Machinery Department' },
+    warehouse:{ ar: '📦 قسم المستودعات',                     en: '📦 Warehouse Department' },
+    design:   { ar: '🎨 قسم التصميم',                        en: '🎨 Design Department' },
+    marketing:{ ar: '📱 قسم التسويق الإلكتروني',             en: '📱 Digital Marketing Department' },
+    projects: { ar: '🔨 قسم المشاريع',                       en: '🔨 Projects Department' },
+    marble:   { ar: '💎 قسم الرخام',                         en: '💎 Marble Department' }
+};
+
+function applyLoginLanguage() {
+    const t = TRANSLATIONS[loginLang];
+    const set = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t[key]; };
+    set('loginTitle', 'loginTitle');
+    set('loginDeptLabel', 'loginDeptLabel');
+    set('loginUsernameLabel', 'loginUsernameLabel');
+    set('loginPasswordLabel', 'loginPasswordLabel');
+    set('loginBtnText', 'loginBtnText');
+    set('loginFooterText', 'loginFooterText');
+
+    const sub = document.getElementById('loginSubtitle');
+    if (sub) sub.innerHTML = t.loginSubtitle;
+
+    const un = document.getElementById('loginUsername');
+    if (un) un.placeholder = t.loginUsernamePlaceholder;
+    const pw = document.getElementById('loginPassword');
+    if (pw) pw.placeholder = t.loginPasswordPlaceholder;
+
+    const deptSel = document.getElementById('loginDept');
+    if (deptSel) {
+        [...deptSel.options].forEach(o => {
+            if (o.value === '') o.textContent = `— ${t.loginDeptPlaceholder} —`;
+            else if (LOGIN_DEPT_OPTIONS[o.value]) o.textContent = LOGIN_DEPT_OPTIONS[o.value][loginLang];
+        });
+    }
+
+    const sw = document.getElementById('loginLangSwitch');
+    if (sw) sw.textContent = loginLang === 'ar' ? 'English' : 'العربية';
+    document.documentElement.dir  = loginLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = loginLang;
+}
+
+function switchLoginLanguage() {
+    loginLang = loginLang === 'ar' ? 'en' : 'ar';
+    applyLoginLanguage();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sw = document.getElementById('loginLangSwitch');
+    if (sw) sw.addEventListener('click', switchLoginLanguage);
+    applyLoginLanguage();
+});
 
 // ============================================================
 // LOGO MANAGER
@@ -1470,7 +1727,7 @@ const ORGANIZATION_DATA = {
                         {id:'Gibsoon',  name:'جيبسون وانجوهي وامبوي',        position:{ar:'عامل مستودع',en:'Warehouse Worker'}},
                         {id:'Remond',   name:'ريمون تى',                     position:{ar:'عامل تسليم',en:'Delivery Worker'}},
                         {id:'benjamin_p', name:'بنجامين ابيرتي',             position:{ar:'عامل مستودع',en:'Warehouse Worker'}},
-                        {id:'bashirwa', name:'بشيروا ادريسا هارون',          position:{ar:'عامل مستودع',en:'Warehouse Worker'}}
+                        {id:'bashirwa', name:'بشيروا ادريسا هارون',          position:{ar:'عامل مستودع',en:'Warehouse Worker'}},
                         {id:'ahmed_ali',    name:'احمد محمد علي',            position:{ar:'عامل تسليم',en:'Delivery Worker'}},
                         {id:'abdulrahman',  name:'عبد الرحمن عبدالله احمد عبدالله', position:{ar:'عامل مستودع',en:'Warehouse Worker'}}
                     ]},
@@ -1517,7 +1774,7 @@ const ORGANIZATION_DATA = {
             teams: {
                 forklift_drivers: { name:{ar:'سائقي الرافعات الشوكية',en:'Forklift Drivers'}, supervisor:'احمد ماهر',
                     employees:[
-                        {id:'ahmed_maher',  name:'احمد ماهر عبدالرازق ابراهيم الغندور',   position:{ar:'الأليات',en:'Forklift Driver'}},
+                        {id:'ahmed_maher',  name:'احمد ماهر عبدالرازق ابراهيم الغندور',   position:{ar:'سائق رافعة شوكية',en:'Forklift Driver'}},
                         {id:'m_badri',      name:'محمد البدري احمد محمد',                  position:{ar:'سائق رافعة شوكية',en:'Forklift Driver'}},
                         {id:'michael_a',    name:'مايكل انيرتي اوكو',                      position:{ar:'سائق رافعة شوكية',en:'Forklift Driver'}},
                         {id:'islam_maher',  name:'اسلام ماهر عبدالرازق ابراهيم الغندور',  position:{ar:'سائق رافعة شوكية',en:'Forklift Driver'}},
@@ -1785,6 +2042,8 @@ class EvaluationApp {
             notes: { general: '', department: '', overall: '' }
         };
         this.originalTitle = '';
+        this.employeeData = {};   // emp_id -> {name, department, team, position_ar, position_en}
+        this.employeesLoaded = false;
         this.cacheElements();
         this.init();
     }
@@ -1818,7 +2077,11 @@ class EvaluationApp {
             'summaryCard','summaryGeneral','summaryDepartment','summaryPercentage','summaryGrade','summaryMessage',
             'summaryGeneralSubtext','summaryDepartmentSubtext','summaryPercentageSubtext','summaryTotalMax',
             'finalScore','finalMaxLabel','scoreGrade','performanceTips','scoreProgress','totalScoreDisplay',
-            'logoModalTitle','logoPreviewTitle','logoCancelText','logoSaveText'
+            'logoModalTitle','logoPreviewTitle','logoCancelText','logoSaveText',
+            'openArchiveBtn','archiveModal','archiveList','closeArchiveBtn','clearArchiveBtn',
+            'viewModal','viewContent','viewReprintBtn','viewCloseBtn','pdfReport',
+            'loginTitle','loginSubtitle','loginDeptLabel','loginDeptPlaceholder','loginUsernameLabel','loginPasswordLabel',
+            'loginBtnText','loginFooterText','loginUsername','loginPassword','loginDept'
         ];
         this.el = {};
         ids.forEach(id => { this.el[id] = document.getElementById(id); });
@@ -1834,12 +2097,16 @@ class EvaluationApp {
         this.renderGeneralCriteria();
         this.bindEvents();
 
-        // If user is not HR, auto-select their dept
-        if (currentUser && currentUser.dept !== 'hr') {
-            this.state.currentDepartment = currentUser.dept;
-            this.el.departmentSelect.value = currentUser.dept;
-            this.onDepartmentChange();
-        }
+        // تحميل الموظفين من قاعدة البيانات (مع إنشائها تلقائياً عند أول استخدام)
+        this.loadEmployees().then(() => {
+            this.applyLanguageTexts();
+            // If user is not HR, auto-select their dept
+            if (currentUser && currentUser.dept !== 'hr') {
+                this.state.currentDepartment = currentUser.dept;
+                this.el.departmentSelect.value = currentUser.dept;
+                this.onDepartmentChange();
+            }
+        });
     }
 
     bindEvents() {
@@ -1855,6 +2122,15 @@ class EvaluationApp {
         this.el.overallNotes.addEventListener('input', e => { this.state.notes.overall = e.target.value; });
         window.addEventListener('beforeprint', () => this.prepareForPrint());
         window.addEventListener('afterprint',  () => this.cleanupAfterPrint());
+
+        // سجل التقييمات
+        this.el.openArchiveBtn.addEventListener('click', () => this.openArchive());
+        this.el.closeArchiveBtn.addEventListener('click', () => this.closeArchive());
+        this.el.clearArchiveBtn.addEventListener('click', () => this.clearArchive());
+        this.el.archiveModal.addEventListener('click', e => { if (e.target === this.el.archiveModal) this.closeArchive(); });
+        this.el.viewCloseBtn.addEventListener('click', () => this.closeView());
+        this.el.viewModal.addEventListener('click', e => { if (e.target === this.el.viewModal) this.closeView(); });
+        this.el.viewReprintBtn.addEventListener('click', () => this.reprintView());
     }
 
     switchLanguage() {
@@ -1862,27 +2138,56 @@ class EvaluationApp {
         const lang = this.state.currentLanguage;
         document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
-        const t = TRANSLATIONS[lang];
-        Object.keys(t).forEach(k => { if (this.el[k]) this.el[k].textContent = t[k]; });
+        this.applyLanguageTexts();
         this.populateSupervisors();
         this.renderGeneralCriteria();
         this.renderDepartmentCriteria();
         this.updateScores();
     }
 
+    applyLanguageTexts() {
+        const lang = this.state.currentLanguage;
+        const t = TRANSLATIONS[lang];
+        Object.keys(t).forEach(k => { if (this.el[k]) this.el[k].textContent = t[k]; });
+        if (this.el.loginSubtitle) this.el.loginSubtitle.innerHTML = t.loginSubtitle;
+        if (this.el.loginUsername) this.el.loginUsername.placeholder = t.loginUsernamePlaceholder;
+        if (this.el.loginPassword) this.el.loginPassword.placeholder = t.loginPasswordPlaceholder;
+        if (this.el.generalNotes)  this.el.generalNotes.placeholder  = t.generalNotesPlaceholder;
+        if (this.el.departmentNotes) this.el.departmentNotes.placeholder = t.departmentNotesPlaceholder;
+        if (this.el.overallNotes)  this.el.overallNotes.placeholder  = t.overallNotesPlaceholder;
+    }
+
     onDepartmentChange() {
         this.state.currentDepartment = this.el.departmentSelect.value;
         this.state.currentEmployee   = '';
+        this.state.currentSupervisor = '';
         this.state.ratings.department = new Map();
         this.populateEmployees();
+        this.populateSupervisors();
         this.renderDepartmentCriteria();
     }
 
     populateSupervisors() {
         const lang = this.state.currentLanguage;
-        this.el.supervisorSelect.innerHTML = '<option value="">-- اختر المشرف --</option>';
-        Object.values(ORGANIZATION_DATA.supervisors).forEach(arr => {
-            arr.forEach(s => {
+        this.el.supervisorSelect.innerHTML = `<option value="">${TRANSLATIONS[lang].selectSupervisorPlaceholder}</option>`;
+
+        const groupMap = {
+            sales:    ['قسم المبيعات'],
+            warehouse:['قسم المستودعات'],
+            design:   ['قسم التصميم'],
+            vehicles: ['قسم الآليات'],
+            finance:  ['قسم المحاسبة'],
+            marketing:['قسم التسويق'],
+            projects: ['قسم المشاريع'],
+            marble:   ['قسم الرخام']
+        };
+        const groups = (this.state.currentDepartment && groupMap[this.state.currentDepartment])
+            ? groupMap[this.state.currentDepartment]
+            : null;
+
+        Object.keys(ORGANIZATION_DATA.supervisors).forEach(key => {
+            if (groups && !groups.includes(key)) return;
+            ORGANIZATION_DATA.supervisors[key].forEach(s => {
                 const o = document.createElement('option');
                 o.value = s.id;
                 o.textContent = `${s.name} - ${s.position[lang]}`;
@@ -1893,18 +2198,15 @@ class EvaluationApp {
 
     populateEmployees() {
         const deptId = this.state.currentDepartment;
-        const dept   = ORGANIZATION_DATA.departments[deptId];
         const lang   = this.state.currentLanguage;
-        this.el.employeeSelect.innerHTML = '<option value="">-- اختر الموظف --</option>';
-        if (!dept) return;
+        this.el.employeeSelect.innerHTML = `<option value="">${TRANSLATIONS[lang].selectEmployeePlaceholder}</option>`;
+        if (!deptId) return;
 
-        let all = [];
-        if (dept.employees) all = all.concat(dept.employees);
-        if (dept.teams) Object.values(dept.teams).forEach(t => { if(t.employees) all = all.concat(t.employees); });
-        all.forEach(emp => {
+        const employees = Object.values(this.employeeData).filter(e => e.department === deptId);
+        employees.forEach(emp => {
             const o = document.createElement('option');
-            o.value = emp.id;
-            o.textContent = `${emp.name} - ${emp.position[lang]}`;
+            o.value = emp.emp_id;
+            o.textContent = `${emp.name} - ${emp['position_' + lang]}`;
             this.el.employeeSelect.appendChild(o);
         });
     }
@@ -2010,32 +2312,27 @@ class EvaluationApp {
         const dept = ORGANIZATION_DATA.departments[deptId];
         if (!dept) return [];
 
-        const empOpt = this.el.employeeSelect.querySelector(`option[value="${employeeId}"]`);
-        const empTxt = empOpt ? empOpt.textContent : '';
+        const emp  = this.employeeData[employeeId] || null;
+        const team = emp ? emp.team : '';
+        const posAr = emp ? (emp.position_ar || '') : '';
 
         if (deptId === 'sales') {
             return dept.criteria.sales_rep || [];
         }
         if (deptId === 'vehicles') {
-            if (empTxt.includes('رافعة شوكية') || empTxt.includes('Forklift')) return dept.criteria.forklift_drivers || [];
-            if (empTxt.includes('سائق شحن') || empTxt.includes('Shipping Driver')) return dept.criteria.shipping_drivers || [];
+            if (team === 'shipping_drivers') return dept.criteria.shipping_drivers || [];
             return dept.criteria.forklift_drivers || [];
         }
         if (deptId === 'marketing') {
-            if (empTxt.includes('مصور') || empTxt.includes('Photographer')) return dept.teams.photographer.criteria || [];
-            if (empTxt.includes('مونتاج') || empTxt.includes('Video Editor')) return dept.teams.editor.criteria || [];
-            if (empTxt.includes('مصمم إعلان') || empTxt.includes('Ad Designer')) return dept.teams.designer.criteria || [];
-            if (empTxt.includes('سوشيال ميديا') || empTxt.includes('Social Media')) return dept.teams.social_media.criteria || [];
+            if (team && dept.teams[team]) return dept.teams[team].criteria || [];
             return [];
         }
         if (deptId === 'projects') {
-            if (empTxt.includes('فورمان') || empTxt.includes('Foreman')) return dept.criteria.foremen || [];
+            if (posAr.includes('فورمان')) return dept.criteria.foremen || [];
             return dept.criteria.project_workers || [];
         }
         if (deptId === 'marble') {
-            if (empTxt.includes('عامل قص') || empTxt.includes('Cutter')) return dept.criteria.cutting_workers || [];
-            if (empTxt.includes('عامل تركيب') || empTxt.includes('Installer')) return dept.criteria.installation_workers || [];
-            if (empTxt.includes('عامل تشطيب') || empTxt.includes('Finisher')) return dept.criteria.finishing_workers || [];
+            if (team && dept.criteria[team]) return dept.criteria[team] || [];
             return dept.criteria.project_workers || [];
         }
         if (Array.isArray(dept.criteria)) return dept.criteria;
@@ -2160,9 +2457,12 @@ class EvaluationApp {
         this.el.scoreProgress.style.width    = `${pct}%`;
         this.el.scoreProgress.style.background = grade.color;
 
-        if (this.state.currentDepartment) {
+        if (this.state.currentDepartment && this.state.currentEmployee && deptMax > 0) {
             this.el.summaryCard.style.display      = 'block';
-            this.el.totalScoreDisplay.style.display= 'block';
+            this.el.totalScoreDisplay.style.display = 'block';
+        } else {
+            this.el.summaryCard.style.display       = 'none';
+            this.el.totalScoreDisplay.style.display = 'none';
         }
     }
 
@@ -2200,15 +2500,520 @@ class EvaluationApp {
         return true;
     }
 
+    // ============================================================
+    // GENERATE PDF AND SEND TO TELEGRAM
+    // - PDF يُولَّد من HTML عبر html2canvas لضمان ظهور العربية سليمة
+    // - يُحفظ في قاعدة البيانات (سجل التقييمات)
+    // - يُرسل إلى تليجرام عبر السيرفر (الرمز محفوظ في api.php فقط)
+    // ============================================================
     async generateAndSendReport() {
         if (!this.validateForm()) return;
-        this.showNotification('info','جارٍ المعالجة','جاري إعداد التقرير وإرساله...');
+        const btn = this.el.generateAndSend;
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>جارٍ المعالجة...</span>';
+        this.showNotification('info', 'جارٍ المعالجة', 'جاري إنشاء ملف PDF وحفظه وإرساله...');
+
         const data = this.collectReportData();
-        try { await this.sendToTelegram(data); } catch(e) { console.warn('Telegram send failed:', e); }
-        this.prepareForPrint();
-        this.originalTitle = document.title;
-        document.title = `تقييم_${data.employee.split('-')[0].trim()}_${this.state.evaluationDate}`;
-        window.print();
+        let pdfBlob = null;
+
+        try {
+            // 1. إنشاء ملف PDF عربي سليم
+            pdfBlob = await this.createEvaluationPDF(data);
+            if (!pdfBlob) throw new Error('فشل إنشاء ملف PDF');
+
+            // 2. حفظ التقييم في قاعدة البيانات
+            try {
+                const saved = await this.saveEvaluationToDB(data);
+                data.savedId = saved.id;
+            } catch (dbErr) {
+                console.warn('تعذر الحفظ في قاعدة البيانات:', dbErr);
+            }
+
+            // 3. الإرسال إلى تليجرام عبر السيرفر
+            try {
+                await this.sendPDFToTelegram(pdfBlob, data);
+                this.showNotification('success', 'تم الإرسال', 'تم إرسال تقرير PDF إلى قناة الموارد البشرية بنجاح');
+            } catch (tgErr) {
+                console.error(tgErr);
+                this.showNotification('error', 'فشل الإرسال', 'تعذر إرسال الملف إلى تليجرام، لكن تم إنشاء الملف وحفظه');
+            }
+
+            // 4. تحميل الملف محلياً (بدون window.open لتفادي حجب النوافذ المنبثقة)
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `تقييم_${data.employeeName || 'موظف'}_${data.date}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+        } catch (err) {
+            console.error(err);
+            this.showNotification('error', 'فشل الإنشاء', 'حدث خطأ أثناء إنشاء ملف PDF: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+
+    // ============================================================
+    // BUILD PDF REPORT (يملأ حاوية #pdfReport من البيانات)
+    // ============================================================
+    buildPdfReport(data) {
+        const lang = this.state.currentLanguage;
+        const t = TRANSLATIONS[lang];
+        this.el.pdfReportTitle.textContent = t.printReportTitle;
+
+        const info = `
+            <tr><th>${t.printEmployeeLabel}</th><td>${this.esc(data.employeeName)}</td>
+                <th>${t.printDepartmentLabel}</th><td>${this.esc(data.department)}</td></tr>
+            <tr><th>${t.printSupervisorLabel}</th><td>${this.esc(data.supervisor)}</td>
+                <th>${t.printDateLabel}</th><td>${this.esc(data.date)}</td></tr>
+            <tr><th>${t.printTotalScoreLabel}</th><td>${data.totalScore.toFixed(1)}/${data.totalMax} (${data.percentage}%)</td>
+                <th>${t.printGradeLabel}</th><td>${this.esc(data.grade)}</td></tr>`;
+        this.el.pdfInfoTable.innerHTML = info;
+
+        let crit = '';
+        if (data.generalRatings && data.generalRatings.length) {
+            crit += `<div class="pdf-section-title">${t.generalCriteriaTitle}</div>`;
+            crit += this.criteriaToHtml(data.generalRatings);
+        }
+        if (data.deptRatings && data.deptRatings.length) {
+            crit += `<div class="pdf-section-title">${t.departmentCriteriaTitle}</div>`;
+            crit += this.criteriaToHtml(data.deptRatings);
+        }
+        this.el.pdfCriteria.innerHTML = crit;
+
+        this.el.pdfTotal.innerHTML = `${t.totalScoreLabel}: ${data.totalScore.toFixed(1)} / ${data.totalMax} (${data.percentage}%) — ${this.esc(data.grade)}`;
+
+        const nl = (label, txt) => `<div class="nlabel">${label}</div><div class="nbox">${this.esc(txt || (lang==='ar' ? 'لا توجد ملاحظات' : 'No notes'))}</div>`;
+        this.el.pdfNotes.innerHTML =
+            nl(t.printGeneralNotesLabel, data.notes.general) +
+            nl(t.printDepartmentNotesLabel, data.notes.department) +
+            nl(t.printOverallNotesLabel, data.notes.overall);
+
+        this.el.pdfSignatures.innerHTML = `
+            <div class="pdf-sig-box">${t.employeeSignatureTitle}
+                <div class="pdf-sig-line">${this.esc(data.employeeName)}</div><div>${data.date}</div></div>
+            <div class="pdf-sig-box">${t.supervisorSignatureTitle}
+                <div class="pdf-sig-line">${this.esc(data.supervisor)}</div><div>${data.date}</div></div>
+            <div class="pdf-sig-box">${t.hrSignatureTitle}
+                <div class="pdf-sig-line">قسم الموارد البشرية</div><div>${data.date}</div></div>`;
+    }
+
+    criteriaToHtml(rows) {
+        const lang = this.state.currentLanguage;
+        const t = TRANSLATIONS[lang];
+        let html = `<table class="pdf-criteria-table"><thead><tr>
+            <th style="width:30%">${t.tableHeaderCriterion}</th>
+            <th style="width:35%">${t.tableHeaderDescription}</th>
+            <th style="width:10%">${t.tableHeaderWeight}</th>
+            <th style="width:12%">${t.tableHeaderRating}</th>
+            <th style="width:10%">${t.tableHeaderValue}</th>
+        </tr></thead><tbody>`;
+        rows.forEach(r => {
+            const value = r.rating > 0 ? ((r.rating / 5) * (r.weight || 10)).toFixed(1) : '0.0';
+            html += `<tr><td class="name">${this.esc(r.name)}</td><td class="desc">${this.esc(r.description || '')}</td>
+                <td>${r.weight || 10}</td><td>${r.rating > 0 ? r.rating : '-'}</td><td>${value}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        return html;
+    }
+
+    // ============================================================
+    // CREATE PDF (html2canvas -> jsPDF) — يدعم العربية بشكل سليم
+    // ============================================================
+    async createEvaluationPDF(data) {
+        if (typeof html2canvas === 'undefined') throw new Error('مكتبة html2canvas غير محملة');
+        const report = this.el.pdfReport;
+
+        this.buildPdfReport(data);
+
+        const prev = { position: report.style.position, left: report.style.left, top: report.style.top, zIndex: report.style.zIndex };
+        report.style.position = 'fixed';
+        report.style.left = '0';
+        report.style.top = '0';
+        report.style.zIndex = '-1';
+        report.style.display = 'block';
+
+        await document.fonts.ready;
+        await new Promise(r => setTimeout(r, 60));
+
+        let canvas;
+        try {
+            canvas = await html2canvas(report, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+        } finally {
+            report.style.position = prev.position;
+            report.style.left = prev.left;
+            report.style.top = prev.top;
+            report.style.zIndex = prev.zIndex;
+            report.style.display = 'none';
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+
+        const imgW = pageW;
+        const ratio = canvas.width / pageW;          // بكسل لكل نقطة
+        const pagePxH = pageH * ratio;               // ارتفاع الصفحة بالبكسل
+        const imgH = (canvas.height / canvas.width) * imgW;
+
+        if (canvas.height <= pagePxH + 10) {
+            doc.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, imgW, imgH);
+        } else {
+            let y = 0, first = true;
+            while (y < canvas.height) {
+                const h = Math.min(pagePxH, canvas.height - y);
+                const slice = document.createElement('canvas');
+                slice.width = canvas.width;
+                slice.height = Math.round(h);
+                const ctx = slice.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, slice.width, slice.height);
+                ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+                if (!first) doc.addPage();
+                doc.addImage(slice.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, imgW, (h / canvas.width) * imgW);
+                first = false;
+                y += pagePxH;
+            }
+        }
+        return doc.output('blob');
+    }
+
+    // ============================================================
+    // SEND PDF TO TELEGRAM (عبر السيرفر - بدون كشف الرمز)
+    // ============================================================
+    async sendPDFToTelegram(pdfBlob, data) {
+        const fd = new FormData();
+        fd.append('document', pdfBlob, `evaluation_${(data.employee_id || 'emp')}_${data.date}.pdf`);
+        fd.append('caption', `📄 تقرير تقييم: ${data.employeeName}\n🏢 ${data.department}\n👤 المشرف: ${data.supervisor}\n📊 النتيجة: ${data.totalScore.toFixed(1)}/${data.totalMax} (${data.percentage}%) — ${data.grade}`);
+
+        const res = await fetch(`${CONFIG.API_BASE}?action=send_telegram`, { method: 'POST', body: fd });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'فشل الإرسال');
+        return json;
+    }
+
+    // ============================================================
+    // قاعدة البيانات (API)
+    // ============================================================
+    async apiFetch(action, opts) {
+        const res = await fetch(`${CONFIG.API_BASE}?action=${action}`, opts);
+        return res.json();
+    }
+
+    async loadEmployees() {
+        try {
+            const json = await this.apiFetch('employees');
+            if (json.ok && json.empty) {
+                await this.seedEmployees();
+                const again = await this.apiFetch('employees');
+                if (again.ok && again.data.length) this.applyEmployeeData(again.data);
+            } else if (json.ok && json.data.length) {
+                this.applyEmployeeData(json.data);
+            }
+        } catch (e) {
+            console.warn('قاعدة البيانات غير متاحة، استخدام البيانات المدمجة', e);
+        }
+        if (!this.employeesLoaded) this.buildEmployeesFromStatic();
+        this.populateEmployees();
+    }
+
+    applyEmployeeData(rows) {
+        this.employeeData = {};
+        rows.forEach(e => { this.employeeData[e.emp_id] = e; });
+        this.employeesLoaded = true;
+    }
+
+    flattenStaticEmployees() {
+        const list = [];
+        Object.keys(ORGANIZATION_DATA.departments).forEach(deptId => {
+            const dept = ORGANIZATION_DATA.departments[deptId];
+            const push = (emp, team) => list.push({
+                emp_id: emp.id, name: emp.name, department: deptId, team: team || '',
+                position_ar: emp.position.ar, position_en: emp.position.en
+            });
+            if (dept.employees) dept.employees.forEach(e => push(e, ''));
+            if (dept.teams) Object.entries(dept.teams).forEach(([teamId, t]) => { if (t.employees) t.employees.forEach(e => push(e, teamId)); });
+        });
+        return list;
+    }
+
+    buildEmployeesFromStatic() {
+        this.applyEmployeeData(this.flattenStaticEmployees());
+        this.seedEmployees(); // محاولة تهيئة قاعدة البيانات في الخلفية
+    }
+
+    async seedEmployees(list) {
+        try {
+            await this.apiFetch('seed_employees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employees: list || this.flattenStaticEmployees() })
+            });
+        } catch (e) { console.warn('تعذر حفظ الموظفين في قاعدة البيانات', e); }
+    }
+
+    async saveEvaluationToDB(data) {
+        const json = await this.apiFetch('save_evaluation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                employee_name: data.employeeName,
+                employee_id: data.employee_id,
+                department: data.department,
+                department_code: data.department_code,
+                team: data.team,
+                position: data.position,
+                supervisor: data.supervisor,
+                evaluator: data.evaluator,
+                evaluation_date: data.date,
+                total_score: data.totalScore,
+                total_max: data.totalMax,
+                percentage: data.percentage,
+                grade: data.grade,
+                general_data: data.generalRatings,
+                department_data: data.deptRatings,
+                general_notes: data.notes.general,
+                department_notes: data.notes.department,
+                overall_notes: data.notes.overall
+            })
+        });
+        if (!json.ok) throw new Error(json.error || 'فشل حفظ التقييم');
+        return json;
+    }
+
+    dataFromRecord(r) {
+        return {
+            employeeName: r.employee_name,
+            employee_id: r.employee_id,
+            department: r.department,
+            department_code: r.department_code,
+            team: r.team,
+            position: r.position,
+            supervisor: r.supervisor,
+            evaluator: r.evaluator,
+            date: r.evaluation_date,
+            totalScore: parseFloat(r.total_score),
+            totalMax: parseInt(r.total_max),
+            percentage: parseFloat(r.percentage),
+            grade: r.grade,
+            notes: { general: r.general_notes, department: r.department_notes, overall: r.overall_notes },
+            generalRatings: r.general_data || [],
+            deptRatings: r.department_data || []
+        };
+    }
+
+    // ============================================================
+    // سجل التقييمات (Archive)
+    // ============================================================
+    async openArchive() {
+        this.el.archiveModal.classList.add('show');
+        await this.renderArchiveList();
+    }
+    closeArchive() { this.el.archiveModal.classList.remove('show'); }
+
+    async renderArchiveList() {
+        const lang = this.state.currentLanguage;
+        const t = TRANSLATIONS[lang];
+        const box = this.el.archiveList;
+        box.innerHTML = '<div class="archive-empty"><i class="fas fa-spinner fa-spin"></i><h3>...</h3></div>';
+        try {
+            const json = await this.apiFetch('list_evaluations');
+            if (!json.ok || !json.data.length) {
+                box.innerHTML = `<div class="archive-empty"><i class="fas fa-database"></i><h3>${t.archiveEmptyTitle}</h3><p>${t.archiveEmptyText}</p></div>`;
+                return;
+            }
+            let html = `<table class="archive-table"><thead><tr>
+                <th>${t.archiveThId}</th><th>${t.archiveThEmployee}</th><th>${t.archiveThDept}</th>
+                <th>${t.archiveThDate}</th><th>${t.archiveThScore}</th><th>${t.archiveThGrade}</th><th>${t.archiveThActions}</th>
+            </tr></thead><tbody>`;
+            json.data.forEach((r, i) => {
+                const color = this.getGradeColor(r.percentage).color;
+                html += `<tr>
+                    <td>${json.data.length - i}</td>
+                    <td>${this.esc(r.employee_name)}</td>
+                    <td>${this.esc(r.department)}</td>
+                    <td>${this.esc(r.evaluation_date)}</td>
+                    <td>${r.total_score}/${r.total_max} (${r.percentage}%)</td>
+                    <td><span class="grade-pill" style="background:${color}">${this.esc(r.grade)}</span></td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn-sm view" data-id="${r.id}" data-action="view"><i class="fas fa-eye"></i> ${t.btnView}</button>
+                        <button class="btn-sm pdf" data-id="${r.id}" data-action="pdf"><i class="fas fa-file-pdf"></i> ${t.btnPrint}</button>
+                        <button class="btn-sm delete" data-id="${r.id}" data-action="delete"><i class="fas fa-trash"></i> ${t.btnDelete}</button>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            box.innerHTML = html;
+            box.querySelectorAll('button[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id, action = btn.dataset.action;
+                    if (action === 'view') this.viewEvaluation(id);
+                    else if (action === 'pdf') this.printEvaluationById(id);
+                    else if (action === 'delete') this.deleteEvaluation(id);
+                });
+            });
+        } catch (err) {
+            box.innerHTML = `<div class="archive-empty"><i class="fas fa-exclamation-triangle"></i><h3>خطأ في الاتصال بقاعدة البيانات</h3><p>${this.esc(err.message)}</p></div>`;
+        }
+    }
+
+    async viewEvaluation(id) {
+        try {
+            const json = await this.apiFetch(`get_evaluation&id=${id}`);
+            if (!json.ok) throw new Error(json.error);
+            this.viewingRecord = json.data;
+            const data = this.dataFromRecord(this.viewingRecord);
+            const lang = this.state.currentLanguage;
+            const t = TRANSLATIONS[lang];
+            let html = `<table class="pdf-info-table"><tbody>
+                <tr><th>${t.printEmployeeLabel}</th><td>${this.esc(data.employeeName)}</td>
+                    <th>${t.printDepartmentLabel}</th><td>${this.esc(data.department)}</td></tr>
+                <tr><th>${t.printSupervisorLabel}</th><td>${this.esc(data.supervisor)}</td>
+                    <th>${t.printDateLabel}</th><td>${this.esc(data.date)}</td></tr>
+                <tr><th>${t.printTotalScoreLabel}</th><td>${data.totalScore.toFixed(1)}/${data.totalMax} (${data.percentage}%)</td>
+                    <th>${t.printGradeLabel}</th><td>${this.esc(data.grade)}</td></tr>
+            </tbody></table>`;
+            html += `<div class="pdf-section-title">${t.generalCriteriaTitle}</div>` + this.criteriaToHtml(data.generalRatings || []);
+            html += `<div class="pdf-section-title">${t.departmentCriteriaTitle}</div>` + this.criteriaToHtml(data.deptRatings || []);
+            html += `<div class="pdf-notes" style="margin-top:12px;">`;
+            const nl = (l, x) => `<div class="nlabel">${l}</div><div class="nbox">${this.esc(x || (lang==='ar' ? 'لا توجد ملاحظات' : 'No notes'))}</div>`;
+            html += nl(t.printGeneralNotesLabel, data.notes.general) + nl(t.printDepartmentNotesLabel, data.notes.department) + nl(t.printOverallNotesLabel, data.notes.overall);
+            html += '</div>';
+            this.el.viewContent.innerHTML = html;
+            this.el.viewModal.classList.add('show');
+        } catch (err) {
+            this.showNotification('error', 'خطأ', err.message);
+        }
+    }
+    closeView() { this.el.viewModal.classList.remove('show'); this.viewingRecord = null; }
+
+    async reprintView() {
+        if (!this.viewingRecord) return;
+        await this.printEvaluationById(this.viewingRecord.id, false);
+    }
+
+    async printEvaluationById(id, closeAfter = true) {
+        try {
+            const json = await this.apiFetch(`get_evaluation&id=${id}`);
+            if (!json.ok) throw new Error(json.error);
+            const data = this.dataFromRecord(json.data);
+            this.showNotification('info', 'جارٍ المعالجة', 'جاري إنشاء ملف PDF...');
+            const blob = await this.createEvaluationPDF(data);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `تقييم_${data.employeeName}_${data.date}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+            if (closeAfter) this.closeArchive();
+            this.showNotification('success', 'تم الإنشاء', 'تم إنشاء ملف PDF الخاص بالتقييم');
+        } catch (err) {
+            this.showNotification('error', 'خطأ', err.message);
+        }
+    }
+
+    async deleteEvaluation(id) {
+        const lang = this.state.currentLanguage;
+        if (!confirm(lang === 'ar' ? 'هل تريد حذف هذا التقييم نهائياً؟' : 'Delete this evaluation permanently?')) return;
+        try {
+            const json = await this.apiFetch(`delete_evaluation&id=${id}`);
+            if (!json.ok) throw new Error(json.error);
+            this.showNotification('success', 'تم الحذف', lang === 'ar' ? 'تم حذف التقييم' : 'Evaluation deleted');
+            await this.renderArchiveList();
+        } catch (err) {
+            this.showNotification('error', 'خطأ', err.message);
+        }
+    }
+
+    async clearArchive() {
+        const lang = this.state.currentLanguage;
+        if (!confirm(lang === 'ar' ? 'هل تريد حذف جميع التقييمات المحفوظة؟' : 'Delete all saved evaluations?')) return;
+        try {
+            const json = await this.apiFetch('clear_evaluations');
+            if (!json.ok) throw new Error(json.error);
+            await this.renderArchiveList();
+        } catch (err) {
+            this.showNotification('error', 'خطأ', err.message);
+        }
+    }
+
+    // ============================================================
+    // أدوات مساعدة
+    // ============================================================
+    esc(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+    }
+
+    getGradeColor(pct) {
+        const p = parseFloat(pct) || 0;
+        if (p >= 90) return { name: 'ممتاز', color: '#27ae60' };
+        if (p >= 80) return { name: 'جيد جداً', color: '#2ecc71' };
+        if (p >= 70) return { name: 'جيد', color: '#f39c12' };
+        if (p >= 60) return { name: 'مقبول', color: '#e67e22' };
+        return { name: 'ضعيف', color: '#e74c3c' };
+    }
+
+    // ------------------------------------------------------------
+    // HELPERS
+    // ------------------------------------------------------------
+    collectReportData() {
+        const lang   = this.state.currentLanguage;
+        const empOpt = this.el.employeeSelect.options[this.el.employeeSelect.selectedIndex];
+        const supOpt = this.el.supervisorSelect.options[this.el.supervisorSelect.selectedIndex];
+        const dept   = ORGANIZATION_DATA.departments[this.state.currentDepartment];
+        const emp    = this.employeeData[this.state.currentEmployee] || {};
+
+        const generalMax = this.getGeneralMax();
+        const deptMax     = this.getDepartmentMax();
+        const totalMax    = generalMax + deptMax;
+        const genScore  = parseFloat(this.el.generalScore.textContent);
+        const deptScore = parseFloat(this.el.departmentScore.textContent);
+        const total     = genScore + deptScore;
+        const pct       = totalMax > 0 ? Math.min(100, Math.round((total / totalMax) * 1000) / 10) : 0;
+        const grade     = this.getGrade(pct);
+
+        const generalRatings = ORGANIZATION_DATA.general.map(c => ({
+            id: c.id,
+            name: c.name[lang],
+            description: c.description[lang],
+            weight: c.weight,
+            rating: this.state.ratings.general.get(c.id) || 0
+        }));
+
+        const deptCriteria = this.getDepartmentCriteria(this.state.currentDepartment, this.state.currentEmployee);
+        const deptRatings  = deptCriteria.map(c => ({
+            id: c.id,
+            name: c.name[lang],
+            description: (c.description || {})[lang] || '',
+            weight: 10,
+            rating: this.state.ratings.department.get(c.id) || 0
+        }));
+
+        return {
+            employeeName: emp.name || (empOpt ? empOpt.textContent.split('-')[0].trim() : ''),
+            employee_id: emp.emp_id || this.state.currentEmployee,
+            department: dept ? dept.name[lang] : '',
+            department_code: this.state.currentDepartment,
+            team: emp.team || '',
+            position: emp['position_' + lang] || '',
+            supervisor: supOpt ? supOpt.textContent.split('-')[0].trim() : '',
+            evaluator: currentUser ? currentUser.name : '',
+            date: this.state.evaluationDate,
+            generalScore: genScore, generalMax, departmentScore: deptScore, departmentMax: deptMax,
+            totalScore: total, totalMax, percentage: pct,
+            grade: grade.name, gradeMessage: grade.message,
+            notes: this.state.notes,
+            generalRatings: generalRatings,
+            deptRatings: deptRatings
+        };
     }
 
     prepareForPrint() {
@@ -2253,63 +3058,6 @@ class EvaluationApp {
         this.el.printSignatures.style.display     = 'none';
         this.el.printNotesSummary.style.display   = 'none';
         if (this.originalTitle) { document.title = this.originalTitle; this.originalTitle = ''; }
-    }
-
-    collectReportData() {
-        const lang   = this.state.currentLanguage;
-        const empOpt = this.el.employeeSelect.options[this.el.employeeSelect.selectedIndex];
-        const supOpt = this.el.supervisorSelect.options[this.el.supervisorSelect.selectedIndex];
-        const dept   = ORGANIZATION_DATA.departments[this.state.currentDepartment];
-        const generalMax = this.getGeneralMax();
-        const deptMax     = this.getDepartmentMax();
-        const totalMax    = generalMax + deptMax;
-        const genScore  = parseFloat(this.el.generalScore.textContent);
-        const deptScore = parseFloat(this.el.departmentScore.textContent);
-        const total     = genScore + deptScore;
-        const pct       = totalMax > 0 ? Math.min(100, Math.round((total / totalMax) * 1000) / 10) : 0;
-        const grade     = this.getGrade(pct);
-        return {
-            employee: empOpt ? empOpt.textContent : '',
-            department: dept ? dept.name[lang] : '',
-            supervisor: supOpt ? supOpt.textContent : '',
-            evaluator: currentUser ? currentUser.name : '',
-            date: this.state.evaluationDate,
-            generalScore: genScore, generalMax, departmentScore: deptScore, departmentMax: deptMax,
-            totalScore: total, totalMax, percentage: pct,
-            grade: grade.name, gradeMessage: grade.message,
-            notes: this.state.notes
-        };
-    }
-
-    async sendToTelegram(d) {
-        const msg = `
-📊 *تقرير التقييم الموحد*
-----------------------------
-👤 *الموظف:* ${d.employee}
-🏢 *القسم:* ${d.department}
-👨‍💼 *المشرف:* ${d.supervisor}
-✍️ *المقيِّم:* ${d.evaluator}
-📅 *التاريخ:* ${d.date}
-----------------------------
-📈 *النتائج:*
-• المعايير العامة: ${d.generalScore.toFixed(1)}/${d.generalMax}
-• معايير القسم: ${d.departmentScore.toFixed(1)}/${d.departmentMax}
-• الإجمالي: ${d.totalScore.toFixed(1)}/${d.totalMax}
-• النسبة: ${d.percentage}%
-• التقدير: ${d.grade} - ${d.gradeMessage}
-----------------------------
-📝 *الملاحظات:*
-${d.notes.general || 'لا توجد ملاحظات'}
-${d.notes.department || 'لا توجد ملاحظات'}
-${d.notes.overall || 'لا توجد ملاحظات'}
-----------------------------
-🤖 تم الإرسال تلقائياً من النظام الموحد للتقييم`;
-
-        await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CONFIG.HR_CHANNEL, text: msg, parse_mode: 'Markdown' })
-        });
     }
 
     showNotification(type, title, message) {
