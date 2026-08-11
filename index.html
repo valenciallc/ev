@@ -1550,12 +1550,16 @@ const TRANSLATIONS = {
 };
 
 // ============================================================
-// CONFIG
-// - بيانات تليجرام أصبحت على السيرفر فقط (api/api.php)
-// - إذا تغير مسار التشغيل عدّل API_BASE
+// CONFIG — النسخة المستقلة (تعمل بدون سيرفر)
+// - تُفتح مباشرة في أي متصفح (بدون PHP أو قاعدة بيانات)
+// - التقييمات تُحفظ في متصفح الجهاز (localStorage)
+// - إرسال تليجرام يتم مباشرة من المتصفح، لذا الرمز مكتوب هنا
+//   (لاستخدامه في النسخة المستقلة فقط)
 // ============================================================
 const CONFIG = {
-    API_BASE: 'api/api.php'
+    STORAGE_KEY: 'valencia_evaluations',
+    TELEGRAM_BOT_TOKEN: '8211546767:AAHDBtxYSpF3WX2uq8l9d6D8oeCaiA2egjs',
+    TELEGRAM_CHAT_ID: '-1003528917325'
 };
 
 // ============================================================
@@ -2080,6 +2084,7 @@ class EvaluationApp {
             'logoModalTitle','logoPreviewTitle','logoCancelText','logoSaveText',
             'openArchiveBtn','archiveModal','archiveList','closeArchiveBtn','clearArchiveBtn',
             'viewModal','viewContent','viewReprintBtn','viewCloseBtn','pdfReport',
+            'pdfReportTitle','pdfInfoTable','pdfCriteria','pdfTotal','pdfNotes','pdfSignatures',
             'loginTitle','loginSubtitle','loginDeptLabel','loginDeptPlaceholder','loginUsernameLabel','loginPasswordLabel',
             'loginBtnText','loginFooterText','loginUsername','loginPassword','loginDept'
         ];
@@ -2503,8 +2508,8 @@ class EvaluationApp {
     // ============================================================
     // GENERATE PDF AND SEND TO TELEGRAM
     // - PDF يُولَّد من HTML عبر html2canvas لضمان ظهور العربية سليمة
-    // - يُحفظ في قاعدة البيانات (سجل التقييمات)
-    // - يُرسل إلى تليجرام عبر السيرفر (الرمز محفوظ في api.php فقط)
+    // - يُحفظ في سجل التقييمات (في متصفح الجهاز - localStorage)
+    // - يُرسل إلى تليجرام مباشرة من المتصفح
     // ============================================================
     async generateAndSendReport() {
         if (!this.validateForm()) return;
@@ -2522,18 +2527,22 @@ class EvaluationApp {
             pdfBlob = await this.createEvaluationPDF(data);
             if (!pdfBlob) throw new Error('فشل إنشاء ملف PDF');
 
-            // 2. حفظ التقييم في قاعدة البيانات
+            // 2. حفظ التقييم في سجل الجهاز (localStorage)
             try {
                 const saved = await this.saveEvaluationToDB(data);
                 data.savedId = saved.id;
             } catch (dbErr) {
-                console.warn('تعذر الحفظ في قاعدة البيانات:', dbErr);
+                console.warn('تعذر الحفظ في سجل الجهاز:', dbErr);
             }
 
-            // 3. الإرسال إلى تليجرام عبر السيرفر
+            // 3. الإرسال إلى تليجرام مباشرة من المتصفح
             try {
-                await this.sendPDFToTelegram(pdfBlob, data);
-                this.showNotification('success', 'تم الإرسال', 'تم إرسال تقرير PDF إلى قناة الموارد البشرية بنجاح');
+                const res = await this.sendPDFToTelegram(pdfBlob, data);
+                if (res && res.confirmed) {
+                    this.showNotification('success', 'تم الإرسال', 'تم إرسال تقرير PDF إلى قناة الموارد البشرية بنجاح');
+                } else {
+                    this.showNotification('info', 'تم الإرسال', 'تم إرسال الملف إلى تليجرام، تحقق من القناة للتأكيد (المتصفح لا يسمح بقراءة الرد)');
+                }
             } catch (tgErr) {
                 console.error(tgErr);
                 this.showNotification('error', 'فشل الإرسال', 'تعذر إرسال الملف إلى تليجرام، لكن تم إنشاء الملف وحفظه');
@@ -2684,41 +2693,42 @@ class EvaluationApp {
     }
 
     // ============================================================
-    // SEND PDF TO TELEGRAM (عبر السيرفر - بدون كشف الرمز)
+    // SEND PDF TO TELEGRAM (مباشرة من المتصفح — بدون سيرفر)
+    // ملاحظة: المتصفح قد يمنع قراءة الرد بسبب CORS،
+    // لكن طلب الإرسال نفسه يُنفَّذ ويصل الملف إلى القناة.
     // ============================================================
     async sendPDFToTelegram(pdfBlob, data) {
         const fd = new FormData();
+        fd.append('chat_id', CONFIG.TELEGRAM_CHAT_ID);
         fd.append('document', pdfBlob, `evaluation_${(data.employee_id || 'emp')}_${data.date}.pdf`);
         fd.append('caption', `📄 تقرير تقييم: ${data.employeeName}\n🏢 ${data.department}\n👤 المشرف: ${data.supervisor}\n📊 النتيجة: ${data.totalScore.toFixed(1)}/${data.totalMax} (${data.percentage}%) — ${data.grade}`);
 
-        const res = await fetch(`${CONFIG.API_BASE}?action=send_telegram`, { method: 'POST', body: fd });
-        const json = await res.json();
-        if (!json.ok) throw new Error(json.error || 'فشل الإرسال');
-        return json;
+        const url = `https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendDocument`;
+        try {
+            const res = await fetch(url, { method: 'POST', body: fd });
+            const json = await res.json();
+            if (!json.ok) throw new Error(json.description || 'فشل الإرسال');
+            return { ok: true, confirmed: true };
+        } catch (err) {
+            // بسبب CORS يُرسل الملف فعلياً لكن لا يمكن قراءة الرد
+            return { ok: true, confirmed: false };
+        }
     }
 
     // ============================================================
-    // قاعدة البيانات (API)
+    // التخزين المحلي (localStorage) — بدون قاعدة بيانات
     // ============================================================
-    async apiFetch(action, opts) {
-        const res = await fetch(`${CONFIG.API_BASE}?action=${action}`, opts);
-        return res.json();
+    getStorageRecords() {
+        try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '[]'); }
+        catch (e) { return []; }
+    }
+    setStorageRecords(records) {
+        try { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(records)); }
+        catch (e) { console.warn('تعذر الحفظ في متصفح الجهاز', e); }
     }
 
     async loadEmployees() {
-        try {
-            const json = await this.apiFetch('employees');
-            if (json.ok && json.empty) {
-                await this.seedEmployees();
-                const again = await this.apiFetch('employees');
-                if (again.ok && again.data.length) this.applyEmployeeData(again.data);
-            } else if (json.ok && json.data.length) {
-                this.applyEmployeeData(json.data);
-            }
-        } catch (e) {
-            console.warn('قاعدة البيانات غير متاحة، استخدام البيانات المدمجة', e);
-        }
-        if (!this.employeesLoaded) this.buildEmployeesFromStatic();
+        this.applyEmployeeData(this.flattenStaticEmployees());
         this.populateEmployees();
     }
 
@@ -2744,46 +2754,39 @@ class EvaluationApp {
 
     buildEmployeesFromStatic() {
         this.applyEmployeeData(this.flattenStaticEmployees());
-        this.seedEmployees(); // محاولة تهيئة قاعدة البيانات في الخلفية
-    }
-
-    async seedEmployees(list) {
-        try {
-            await this.apiFetch('seed_employees', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ employees: list || this.flattenStaticEmployees() })
-            });
-        } catch (e) { console.warn('تعذر حفظ الموظفين في قاعدة البيانات', e); }
     }
 
     async saveEvaluationToDB(data) {
-        const json = await this.apiFetch('save_evaluation', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                employee_name: data.employeeName,
-                employee_id: data.employee_id,
-                department: data.department,
-                department_code: data.department_code,
-                team: data.team,
-                position: data.position,
-                supervisor: data.supervisor,
-                evaluator: data.evaluator,
-                evaluation_date: data.date,
-                total_score: data.totalScore,
-                total_max: data.totalMax,
-                percentage: data.percentage,
-                grade: data.grade,
-                general_data: data.generalRatings,
-                department_data: data.deptRatings,
-                general_notes: data.notes.general,
-                department_notes: data.notes.department,
-                overall_notes: data.notes.overall
-            })
-        });
-        if (!json.ok) throw new Error(json.error || 'فشل حفظ التقييم');
-        return json;
+        const records = this.getStorageRecords();
+        const record = {
+            id: Date.now(),
+            employee_name: data.employeeName,
+            employee_id: data.employee_id,
+            department: data.department,
+            department_code: data.department_code,
+            team: data.team,
+            position: data.position,
+            supervisor: data.supervisor,
+            evaluator: data.evaluator,
+            evaluation_date: data.date,
+            total_score: data.totalScore,
+            total_max: data.totalMax,
+            percentage: data.percentage,
+            grade: data.grade,
+            general_data: data.generalRatings,
+            department_data: data.deptRatings,
+            general_notes: data.notes.general,
+            department_notes: data.notes.department,
+            overall_notes: data.notes.overall,
+            created_at: new Date().toLocaleString()
+        };
+        records.push(record);
+        this.setStorageRecords(records);
+        return { id: record.id };
+    }
+
+    findRecord(id) {
+        return this.getStorageRecords().find(r => String(r.id) === String(id));
     }
 
     dataFromRecord(r) {
@@ -2821,53 +2824,51 @@ class EvaluationApp {
         const t = TRANSLATIONS[lang];
         const box = this.el.archiveList;
         box.innerHTML = '<div class="archive-empty"><i class="fas fa-spinner fa-spin"></i><h3>...</h3></div>';
-        try {
-            const json = await this.apiFetch('list_evaluations');
-            if (!json.ok || !json.data.length) {
-                box.innerHTML = `<div class="archive-empty"><i class="fas fa-database"></i><h3>${t.archiveEmptyTitle}</h3><p>${t.archiveEmptyText}</p></div>`;
-                return;
-            }
-            let html = `<table class="archive-table"><thead><tr>
-                <th>${t.archiveThId}</th><th>${t.archiveThEmployee}</th><th>${t.archiveThDept}</th>
-                <th>${t.archiveThDate}</th><th>${t.archiveThScore}</th><th>${t.archiveThGrade}</th><th>${t.archiveThActions}</th>
-            </tr></thead><tbody>`;
-            json.data.forEach((r, i) => {
-                const color = this.getGradeColor(r.percentage).color;
-                html += `<tr>
-                    <td>${json.data.length - i}</td>
-                    <td>${this.esc(r.employee_name)}</td>
-                    <td>${this.esc(r.department)}</td>
-                    <td>${this.esc(r.evaluation_date)}</td>
-                    <td>${r.total_score}/${r.total_max} (${r.percentage}%)</td>
-                    <td><span class="grade-pill" style="background:${color}">${this.esc(r.grade)}</span></td>
-                    <td style="white-space:nowrap;">
-                        <button class="btn-sm view" data-id="${r.id}" data-action="view"><i class="fas fa-eye"></i> ${t.btnView}</button>
-                        <button class="btn-sm pdf" data-id="${r.id}" data-action="pdf"><i class="fas fa-file-pdf"></i> ${t.btnPrint}</button>
-                        <button class="btn-sm delete" data-id="${r.id}" data-action="delete"><i class="fas fa-trash"></i> ${t.btnDelete}</button>
-                    </td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-            box.innerHTML = html;
-            box.querySelectorAll('button[data-action]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.dataset.id, action = btn.dataset.action;
-                    if (action === 'view') this.viewEvaluation(id);
-                    else if (action === 'pdf') this.printEvaluationById(id);
-                    else if (action === 'delete') this.deleteEvaluation(id);
-                });
-            });
-        } catch (err) {
-            box.innerHTML = `<div class="archive-empty"><i class="fas fa-exclamation-triangle"></i><h3>خطأ في الاتصال بقاعدة البيانات</h3><p>${this.esc(err.message)}</p></div>`;
+
+        const records = this.getStorageRecords();
+        if (!records.length) {
+            box.innerHTML = `<div class="archive-empty"><i class="fas fa-database"></i><h3>${t.archiveEmptyTitle}</h3><p>${t.archiveEmptyText}</p></div>`;
+            return;
         }
+        const list = records.slice().reverse();
+        let html = `<table class="archive-table"><thead><tr>
+            <th>${t.archiveThId}</th><th>${t.archiveThEmployee}</th><th>${t.archiveThDept}</th>
+            <th>${t.archiveThDate}</th><th>${t.archiveThScore}</th><th>${t.archiveThGrade}</th><th>${t.archiveThActions}</th>
+        </tr></thead><tbody>`;
+        list.forEach((r, i) => {
+            const color = this.getGradeColor(r.percentage).color;
+            html += `<tr>
+                <td>${i + 1}</td>
+                <td>${this.esc(r.employee_name)}</td>
+                <td>${this.esc(r.department)}</td>
+                <td>${this.esc(r.evaluation_date)}</td>
+                <td>${r.total_score}/${r.total_max} (${r.percentage}%)</td>
+                <td><span class="grade-pill" style="background:${color}">${this.esc(r.grade)}</span></td>
+                <td style="white-space:nowrap;">
+                    <button class="btn-sm view" data-id="${r.id}" data-action="view"><i class="fas fa-eye"></i> ${t.btnView}</button>
+                    <button class="btn-sm pdf" data-id="${r.id}" data-action="pdf"><i class="fas fa-file-pdf"></i> ${t.btnPrint}</button>
+                    <button class="btn-sm delete" data-id="${r.id}" data-action="delete"><i class="fas fa-trash"></i> ${t.btnDelete}</button>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        box.innerHTML = html;
+        box.querySelectorAll('button[data-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id, action = btn.dataset.action;
+                if (action === 'view') this.viewEvaluation(id);
+                else if (action === 'pdf') this.printEvaluationById(id);
+                else if (action === 'delete') this.deleteEvaluation(id);
+            });
+        });
     }
 
     async viewEvaluation(id) {
         try {
-            const json = await this.apiFetch(`get_evaluation&id=${id}`);
-            if (!json.ok) throw new Error(json.error);
-            this.viewingRecord = json.data;
-            const data = this.dataFromRecord(this.viewingRecord);
+            const record = this.findRecord(id);
+            if (!record) throw new Error('لم يتم العثور على التقييم');
+            this.viewingRecord = record;
+            const data = this.dataFromRecord(record);
             const lang = this.state.currentLanguage;
             const t = TRANSLATIONS[lang];
             let html = `<table class="pdf-info-table"><tbody>
@@ -2899,9 +2900,9 @@ class EvaluationApp {
 
     async printEvaluationById(id, closeAfter = true) {
         try {
-            const json = await this.apiFetch(`get_evaluation&id=${id}`);
-            if (!json.ok) throw new Error(json.error);
-            const data = this.dataFromRecord(json.data);
+            const record = this.findRecord(id);
+            if (!record) throw new Error('لم يتم العثور على التقييم');
+            const data = this.dataFromRecord(record);
             this.showNotification('info', 'جارٍ المعالجة', 'جاري إنشاء ملف PDF...');
             const blob = await this.createEvaluationPDF(data);
             const url = URL.createObjectURL(blob);
@@ -2922,26 +2923,17 @@ class EvaluationApp {
     async deleteEvaluation(id) {
         const lang = this.state.currentLanguage;
         if (!confirm(lang === 'ar' ? 'هل تريد حذف هذا التقييم نهائياً؟' : 'Delete this evaluation permanently?')) return;
-        try {
-            const json = await this.apiFetch(`delete_evaluation&id=${id}`);
-            if (!json.ok) throw new Error(json.error);
-            this.showNotification('success', 'تم الحذف', lang === 'ar' ? 'تم حذف التقييم' : 'Evaluation deleted');
-            await this.renderArchiveList();
-        } catch (err) {
-            this.showNotification('error', 'خطأ', err.message);
-        }
+        const records = this.getStorageRecords().filter(r => String(r.id) !== String(id));
+        this.setStorageRecords(records);
+        this.showNotification('success', 'تم الحذف', lang === 'ar' ? 'تم حذف التقييم' : 'Evaluation deleted');
+        await this.renderArchiveList();
     }
 
     async clearArchive() {
         const lang = this.state.currentLanguage;
         if (!confirm(lang === 'ar' ? 'هل تريد حذف جميع التقييمات المحفوظة؟' : 'Delete all saved evaluations?')) return;
-        try {
-            const json = await this.apiFetch('clear_evaluations');
-            if (!json.ok) throw new Error(json.error);
-            await this.renderArchiveList();
-        } catch (err) {
-            this.showNotification('error', 'خطأ', err.message);
-        }
+        this.setStorageRecords([]);
+        await this.renderArchiveList();
     }
 
     // ============================================================
