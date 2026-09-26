@@ -1484,8 +1484,38 @@ async function login() {
     currentUser = user;
     errEl.classList.remove('show');
     setPasswordVisibility(false);
+    saveSession(user);
     showApp();
     console.log('✅ تم تسجيل الدخول بنجاح:', currentUser.name);
+}
+
+// ---------- SESSION (stay signed in across refresh) ----------
+const SESSION_KEY = 'valencia_session';
+
+function saveSession(user) {
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ u: user.username, d: user.dept, t: Date.now() })); } catch (e) {}
+}
+
+function clearSession() {
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+}
+
+function hasSession() {
+    try { const s = JSON.parse(sessionStorage.getItem(SESSION_KEY)); return !!(s && s.u && USERS.some(u => u.username === s.u)); } catch (e) { return false; }
+}
+
+function restoreSession() {
+    let s = null;
+    try { s = JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch (e) { s = null; }
+    if (!s || !s.u) return false;
+    const user = USERS.find(u => u.username === s.u);
+    if (!user) { clearSession(); return false; }
+    currentUser = user;
+    // the draft restore in the constructor already brought back the department,
+    // employee, ratings and notes — so nothing is re-rendered here
+    showApp(true);
+    console.log('♻️ تم استعادة الجلسة بعد التحديث:', user.name);
+    return true;
 }
 
 function enforceAuth() {
@@ -1500,6 +1530,7 @@ function enforceAuth() {
 
 function logout() {
     currentUser = null;
+    clearSession();
     // undo anything the print fitter / report left inline on the page
     try { if (window.app && app.printFitReset) app.printFitReset(); } catch (e) {}
     // close any open window so the next user starts clean
@@ -1520,7 +1551,7 @@ function logout() {
     console.log('✅ تم تسجيل الخروج');
 }
 
-function showApp() {
+function showApp(preserveWork) {
     document.getElementById('loginScreen').style.display = 'none';
 
     const tb = document.getElementById('userTopBar');
@@ -1533,8 +1564,16 @@ function showApp() {
     document.getElementById('mainApp').style.display = 'block';
     applyAccessControl();
 
-    if (!window.app) window.app = new EvaluationApp();
-    else applyDepartmentLock();
+    if (!window.app) { window.app = new EvaluationApp(); return; }
+    // after a refresh the restored work must stay untouched; a fresh login starts clean
+    if (preserveWork) {
+        if (currentUser.dept !== 'hr') {
+            const sel = document.getElementById('departmentSelect');
+            if (sel && sel.value !== currentUser.dept) { sel.value = currentUser.dept; window.app.onDepartmentChange(); }
+        }
+        return;
+    }
+    applyDepartmentLock();
 }
 
 function applyAccessControl() {
@@ -1565,7 +1604,7 @@ document.getElementById('btnLogin').addEventListener('click', login);
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
 document.getElementById('btnLogout').addEventListener('click', logout);
-window.addEventListener('pageshow', () => { if (!currentUser) enforceAuth(); });
+window.addEventListener('pageshow', () => { if (!currentUser && !restoreSession()) enforceAuth(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !currentUser) enforceAuth(); });
 
 // إظهار / إخفاء كلمة المرور
@@ -1744,14 +1783,22 @@ function applyLoginLanguage() {
     }
 }
 
+const LANG_KEY = 'valencia_lang';
+
+function saveLang(lang) { try { localStorage.setItem(LANG_KEY, lang); } catch (e) {} }
+function getSavedLang() { try { return localStorage.getItem(LANG_KEY); } catch (e) { return null; } }
+
 function switchLoginLanguage() {
     loginLang = loginLang === 'ar' ? 'en' : 'ar';
+    saveLang(loginLang);
     applyLoginLanguage();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const sw = document.getElementById('loginLangSwitch');
     if (sw) sw.addEventListener('click', switchLoginLanguage);
+    const saved = getSavedLang();
+    if (saved === 'ar' || saved === 'en') loginLang = saved;
     applyLoginLanguage();
 });
 
@@ -2454,7 +2501,7 @@ const ORGANIZATION_DATA = {
                         { id:'abbas',   name:'عباس عبد الله بنجوره',             nameEn:'Abbas Abdullah Benjoura',        role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
                         { id:'alsaed',  name:'السعيد صالح محمد صالح الطنطاوي',            nameEn:'El-Saeed Saleh Mohammed Saleh Al-Tantawi',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
                         { id:'qasim',   name:'قاسم ربيع خليل',                  nameEn:'Qassem Rabie Khalil',           role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'saqib_m',   name:'شزاد شوكت شوكت برفاز',                  nameEn:'Saqib Shaukat Shaukat Perfaiz',           role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'saqib_m',   name:'ساقب شوكت شوكت بيرفايز',                  nameEn:'Saqib Shaukat Shaukat Perfaiz',           role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
                         { id:'najm',    name:'نجم محمد عبد الجليل',             nameEn:'Najm Mohammed Abdeljalil',       role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' }
                     ]
                 },
@@ -2608,9 +2655,9 @@ function getEmployee(deptId, empId) {
 // EVALUATION APP
 // ============================================================
 class EvaluationApp {
-    constructor() {
+    constructor(initialLang) {
         this.state = {
-            lang: 'ar',
+            lang: (initialLang === 'en') ? 'en' : 'ar',
             currentDepartment: '',
             currentEmployee: '',
             currentSupervisor: '',
@@ -2632,12 +2679,15 @@ class EvaluationApp {
         const dateInput = document.getElementById('evaluationDate');
         if (dateInput) dateInput.value = today;
 
+        // read the stored work BEFORE anything on this page can save over it
+        const draftSnapshot = this.readDraft();
+
         this.populateSupervisors();
         this.renderGeneralCriteria();
-        this.onDepartmentChange();
         this.bindEvents();
-        this.applyLanguage('ar');
-        this.restoreDraft();
+        this.applyLanguage(this.state.lang === 'en' ? 'en' : 'ar');
+        this.restoreDraft(draftSnapshot);
+        if (!this.state.currentDepartment) this.onDepartmentChange();
     }
 
     bindEvents() {
@@ -3535,9 +3585,12 @@ class EvaluationApp {
         } catch (e) { /* ignore quota errors */ }
     }
 
-    restoreDraft() {
-        let draft = null;
-        try { draft = JSON.parse(localStorage.getItem(CONFIG.DRAFT_KEY)); } catch (e) { draft = null; }
+    readDraft() {
+        try { return JSON.parse(localStorage.getItem(CONFIG.DRAFT_KEY)); } catch (e) { return null; }
+    }
+
+    restoreDraft(snapshot) {
+        const draft = (snapshot === undefined) ? this.readDraft() : snapshot;
         if (!draft || !draft.department) return;
         this.loadFromArchive({
             departmentId: draft.department,
@@ -3557,6 +3610,7 @@ class EvaluationApp {
     // ---------- LANGUAGE ----------
     applyLanguage(lang) {
         this.state.lang = lang;
+        saveLang(lang);
         const t = TRANSLATIONS[lang];
 
         // مفاتيح تُطبَّق بطرق خاصة (placeholder / innerHTML / نص مركّب)
@@ -3583,12 +3637,27 @@ class EvaluationApp {
         document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
 
+        // ---- keep the work in progress across the language switch ----
+        // onDepartmentChange() clears the employee selection and the department
+        // scores, so they are captured first and put back afterwards.
+        const keepEmp = this.state.currentEmployee;
+        const keepGeneral = Object.assign({}, this.state.generalScores);
+        const keepDeptScores = Object.assign({}, this.state.deptScores);
+
         this.renderGeneralCriteria();
         this.onDepartmentChange();
-        if (this.state.currentEmployee) {
-            document.getElementById('employeeSelect').value = this.state.currentEmployee;
-            this.onEmployeeChange();
+
+        if (keepEmp) {
+            const es = document.getElementById('employeeSelect');
+            const stillThere = Array.prototype.some.call(es.options, o => o.value === keepEmp);
+            if (stillThere) { es.value = keepEmp; this.onEmployeeChange(); }
         }
+        this.state.generalScores = keepGeneral;
+        this.state.deptScores = keepDeptScores;
+        this.renderGeneralCriteria();
+        this.renderDepartmentCriteria();
+        Object.entries(keepGeneral).forEach(([id, v]) => this.setRating('general', id, v));
+        Object.entries(keepDeptScores).forEach(([id, v]) => this.setRating('dept', id, v));
         this.updateSummary();
     }
 
@@ -3671,7 +3740,13 @@ window.addEventListener('beforeprint', () => {
 });
 window.addEventListener('afterprint', () => { if (app) app.printFitReset(); });
 window.addEventListener('DOMContentLoaded', () => {
-    window.app = new EvaluationApp();
+    if (hasSession()) {
+        const ls = document.getElementById('loginScreen');
+        if (ls) ls.style.display = 'none';   // no flash of the login form
+    }
+    const savedLang = getSavedLang();
+    window.app = new EvaluationApp(savedLang === 'en' ? 'en' : 'ar');
+    restoreSession();
 });
 </script>
 </body>
