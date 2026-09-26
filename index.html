@@ -494,6 +494,16 @@
         select optgroup { font-weight: 700; color: var(--secondary); background: var(--light); }
         select optgroup option { font-weight: 400; color: var(--dark); }
 
+        .btn-telegram-test {
+            display: block; width: 100%; margin-top: 8px; padding: 9px 14px;
+            background: transparent; color: var(--primary); border: 1px dashed var(--primary);
+            border-radius: var(--radius); font-family: inherit; font-size: .85rem; font-weight: 600;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-telegram-test:hover { background: rgba(var(--primary-rgb), .07); }
+        .btn-telegram-test i { margin-left: 6px; }
+        @media print { .btn-telegram-test { display: none !important; } }
+
         .btn-generate {
             background: linear-gradient(to right, var(--telegram), #1e96c8);
             color: white; border: none; padding: 15px 30px;
@@ -1157,8 +1167,13 @@
         </div>
 
         <button id="generateAndSend" class="btn-generate">
-            <i class="fas fa-file-pdf"></i>
+            <i class="fab fa-telegram"></i>
             <span id="generateButtonText">طباعة وإرسال PDF</span>
+        </button>
+
+        <button id="btnTestTelegram" class="btn-telegram-test" title="فحص اتصال التليجرام">
+            <i class="fas fa-plug"></i>
+            <span id="testTelegramText">فحص اتصال التليجرام</span>
         </button>
 
         <div class="archive-actions">
@@ -1649,7 +1664,7 @@ const TRANSLATIONS = {
         instructionConfidentialTitle:'سرية المعلومات:', instructionConfidentialText:'جميع نتائج التقييم سرية وتحفظ في سجلات الموارد البشرية',
         instructionAutoSendTitle:'الإرسال التلقائي:', instructionAutoSendText:'يتم إرسال نسخة من التقرير تلقائياً إلى قناة الموارد البشرية عند الطباعة',
         instructionScoringTitle:'آلية الاحتساب:', instructionScoringText:'كل معيار يُقيَّم من 1 إلى 5، وتُحسب النتيجة النهائية كنسبة مئوية دقيقة من مجموع نقاط المعايير الفعلية (العامة + الخاصة بالقسم)، ولا يمكن إرسال التقرير قبل تقييم جميع المعايير الظاهرة',
-        settingsTitle:'إعدادات التقييم', departmentLabel:'القسم', employeeLabel:'الموظف', supervisorLabel:'المشرف المباشر', dateLabel:'تاريخ التقييم', generateButtonText:'طباعة وإرسال PDF',
+        settingsTitle:'إعدادات التقييم', departmentLabel:'القسم', employeeLabel:'الموظف', supervisorLabel:'المشرف المباشر', dateLabel:'تاريخ التقييم', generateButtonText:'طباعة وإرسال PDF', testTelegramText:'فحص اتصال التليجرام',
         archiveButtonText:'سجل التقييمات', archiveModalTitle:'سجل التقييمات المحفوظة', clearArchiveText:'حذف الكل', closeArchiveText:'إغلاق',
         archiveEmptyTitle:'لا توجد تقييمات محفوظة بعد', archiveEmptyText:'عند إرسال أي تقييم سيتم حفظه هنا تلقائياً',
         viewModalTitle:'تفاصيل التقييم', viewReprintText:'طباعة التقييم', viewCloseText:'إغلاق',
@@ -1690,7 +1705,7 @@ const TRANSLATIONS = {
         instructionConfidentialTitle:'Confidentiality:', instructionConfidentialText:'All results are confidential and kept in HR records',
         instructionAutoSendTitle:'Auto Send:', instructionAutoSendText:'A copy is automatically sent to the HR channel upon printing',
         instructionScoringTitle:'Scoring Method:', instructionScoringText:'Each criterion is rated from 1 to 5. The final score is calculated as an accurate percentage of the actual total possible points (general + department-specific), and the report cannot be sent until all visible criteria are rated',
-        settingsTitle:'Evaluation Settings', departmentLabel:'Department', employeeLabel:'Employee', supervisorLabel:'Direct Supervisor', dateLabel:'Evaluation Date', generateButtonText:'Print & Send PDF',
+        settingsTitle:'Evaluation Settings', departmentLabel:'Department', employeeLabel:'Employee', supervisorLabel:'Direct Supervisor', dateLabel:'Evaluation Date', testTelegramText:'Test Telegram Connection', generateButtonText:'Print & Send PDF',
         archiveButtonText:'Evaluation Records', archiveModalTitle:'Saved Evaluation Records', clearArchiveText:'Delete All', closeArchiveText:'Close',
         archiveEmptyTitle:'No saved evaluations yet', archiveEmptyText:'Any evaluation you send will be saved here automatically',
         viewModalTitle:'Evaluation Details', viewReprintText:'Print Evaluation', viewCloseText:'Close',
@@ -2701,6 +2716,7 @@ class EvaluationApp {
             this.applyLanguage(this.state.lang === 'ar' ? 'en' : 'ar');
         });
         document.getElementById('generateAndSend').addEventListener('click', () => this.generateAndSendPDF());
+        document.getElementById('btnTestTelegram').addEventListener('click', () => this.testTelegramConnection());
         document.getElementById('openArchiveBtn').addEventListener('click', () => this.openArchive());
         document.getElementById('closeArchiveBtn').addEventListener('click', () => this.closeArchive());
         document.getElementById('clearArchiveBtn').addEventListener('click', () => this.clearArchive());
@@ -3336,8 +3352,14 @@ class EvaluationApp {
             pdf.save(fileName);
 
             this.saveToArchive(s, g);
-            await this.sendToTelegram(pdf, fileName);
+            const sent = await this.sendToTelegram(pdf, fileName);
             this.clearDraft();
+            if (!sent) {
+                this.showNotification(this.state.lang === 'en' ? 'Saved locally' : 'تم الحفظ محلياً',
+                    this.state.lang === 'en'
+                        ? 'The PDF was downloaded and archived, but Telegram did not deliver it.'
+                        : 'تم تنزيل التقرير وحفظه في السجل، لكن التليجرام لم يستلمه.', 'error', 9000);
+            }
         } catch (err) {
             console.error(err);
             this.showNotification(this.state.lang === 'en' ? 'Error' : 'خطأ',
@@ -3349,17 +3371,63 @@ class EvaluationApp {
     }
 
     async sendToTelegram(pdf, fileName) {
-        if (!CONFIG.TELEGRAM_BOT_TOKEN || !CONFIG.TELEGRAM_CHAT_ID) return;
+        if (!CONFIG.TELEGRAM_BOT_TOKEN || !CONFIG.TELEGRAM_CHAT_ID) return false;
+        const en = this.state.lang === 'en';
         try {
             const form = new FormData();
             form.append('chat_id', CONFIG.TELEGRAM_CHAT_ID);
             form.append('document', pdf.output('blob'), fileName);
             form.append('caption', this.archiveCaption());
-            await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: form });
-            this.showNotification(this.state.lang === 'en' ? 'Sent' : 'تم الإرسال',
-                this.state.lang === 'en' ? 'The report was sent to the HR channel.' : 'تم إرسال التقرير إلى قناة الموارد البشرية.', 'success');
+            const res = await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: form });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) {
+                const why = data.description || `HTTP ${res.status}`;
+                console.warn('Telegram:', res.status, why);
+                this.showNotification(en ? 'Telegram error' : 'خطأ في التليجرام',
+                    en ? `Not delivered: ${why}` : `لم يتم الإرسال: ${why}`, 'error', 9000);
+                return false;
+            }
+            this.showNotification(en ? 'Sent' : 'تم الإرسال',
+                en ? 'The report was delivered to the HR channel.' : 'تم إرسال التقرير إلى قناة الموارد البشرية.', 'success');
+            return true;
         } catch (err) {
             console.warn('Telegram:', err);
+            this.showNotification(en ? 'Telegram error' : 'خطأ في التليجرام',
+                en ? `No connection: ${err.message}` : `لا يوجد اتصال: ${err.message}`, 'error', 9000);
+            return false;
+        }
+    }
+
+    // diagnoses the bot + channel without sending a report
+    async testTelegramConnection() {
+        const en = this.state.lang === 'en';
+        const token = CONFIG.TELEGRAM_BOT_TOKEN;
+        const chat = CONFIG.TELEGRAM_CHAT_ID;
+        if (!token || !chat) {
+            this.showNotification(en ? 'Telegram error' : 'خطأ في التليجرام',
+                en ? 'Bot token or chat id is missing.' : 'مفتاح البوت أو معرّف القناة غير موجود.', 'error');
+            return;
+        }
+        const btn = document.getElementById('btnTestTelegram');
+        if (btn) btn.disabled = true;
+        try {
+            const me = await fetch(`https://api.telegram.org/bot${token}/getMe`).then(r => r.json());
+            if (!me.ok) throw new Error(me.description || 'getMe failed');
+            const ch = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=${encodeURIComponent(chat)}`).then(r => r.json());
+            if (ch.ok) {
+                this.showNotification(en ? 'Telegram OK' : 'اتصال التليجرام سليم',
+                    en ? `@${me.result.username} can post in "${ch.result.title}".`
+                       : `@${me.result.username} able to post in «${ch.result.title}».`, 'success', 8000);
+            } else {
+                this.showNotification(en ? 'Channel not reachable' : 'القناة غير متاحة للبوت',
+                    en ? `@${me.result.username} is valid, but the channel is not: ${ch.description}. Add the bot to the group as an admin.`
+                       : `@${me.result.username} صحيح، لكن القناة غير متاحة: ${ch.description}. أضف البوت إلى المجموعة كمشرف.`, 'error', 12000);
+            }
+        } catch (err) {
+            this.showNotification(en ? 'Telegram error' : 'خطأ في التليجرام',
+                en ? `No connection: ${err.message}` : `لا يوجد اتصال: ${err.message}`, 'error', 9000);
+        } finally {
+            if (btn) btn.disabled = false;
         }
     }
 
@@ -3662,7 +3730,7 @@ class EvaluationApp {
     }
 
     // ---------- NOTIFICATION ----------
-    showNotification(title, message, type = 'success') {
+    showNotification(title, message, type = 'success', duration = 4000) {
         const n = document.getElementById('notification');
         const icon = n.querySelector('.notification-icon i');
         document.getElementById('notificationTitle').textContent = title;
@@ -3670,7 +3738,7 @@ class EvaluationApp {
         icon.className = type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
         n.classList.add('show');
         clearTimeout(this._notifyTimer);
-        this._notifyTimer = setTimeout(() => n.classList.remove('show'), 4000);
+        this._notifyTimer = setTimeout(() => n.classList.remove('show'), duration);
     }
 
     // ---------- PRINT FIT: force the whole report onto ONE A4 page ----------
