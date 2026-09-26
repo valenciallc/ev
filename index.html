@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نموذج التقييم - شركة فالنسيا لتجارة الرخام والحجر الطبيعي</title>
+    <title>النموذج الموحد للتقييم - شركة فالنسيا للرخام والحجر الطبيعي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1077,7 +1077,7 @@
                 <i class="fas fa-camera"></i>
             </div>
         </div>
-        <h1 id="headerTitle">نموذج التقييم</h1>
+        <h1 id="headerTitle">النموذج الموحد للتقييم</h1>
         <div class="company-name" id="companyName">Valencia Marble &amp; Natural Stone Company</div>
     </header>
 
@@ -1181,7 +1181,7 @@
 
         <button id="generateAndSend" class="btn-generate">
             <i class="fas fa-file-pdf"></i>
-            <span id="generateButtonText">إرسال PDF</span>
+            <span id="generateButtonText">طباعة وإرسال PDF</span>
         </button>
 
         <div class="archive-actions">
@@ -1388,7 +1388,7 @@
     <div id="pdfReport" dir="rtl">
         <div class="pdf-company-header">
             <h1 id="pdfReportTitle">تقرير التقييم الموحد</h1>
-            <div class="sub">شركة فالنسيا لتجارة الرخام والحجر الطبيعي - Valencia Marble &amp; Natural Stone Company</div>
+            <div class="sub">شركة فالنسيا للرخام والحجر الطبيعي - Valencia Marble &amp; Natural Stone Company</div>
         </div>
         <table class="pdf-info-table" id="pdfInfoTable"></table>
         <div id="pdfCriteria"></div>
@@ -1421,6 +1421,7 @@
 </div><!-- /mainApp -->
 
 <script>
+
 
 // ============================================================
 // LOGIN CREDENTIALS
@@ -1596,7 +1597,7 @@ document.getElementById('passToggle').addEventListener('click', () => {
 // ============================================================
 const TRANSLATIONS = {
     ar: {
-        headerTitle:'نموذج التقييم', companyName:'Valencia Marble & Natural Stone Company', langText:'English',
+        headerTitle:'النموذج الموحد للتقييم', companyName:'Valencia Marble & Natural Stone Company', langText:'English',
         loginTitle:'تسجيل الدخول', loginSubtitle:'Valencia Marble & Natural Stone Company<br>نظام التقييم الموحد للموارد البشرية',
         loginDeptLabel:'القسم', loginDeptPlaceholder:'اختر قسمك', loginUsernameLabel:'اسم المستخدم', loginPasswordLabel:'كلمة المرور',
         loginBtnText:'دخول إلى النظام', loginFooterText:'النظام الموحد للتقييم | جميع البيانات محمية',
@@ -2398,7 +2399,7 @@ const ORGANIZATION_DATA = {
                     nameEn: 'Photography Team',
                     supervisor: 'amin_sup',
                     employees: [
-                        { id:'alaa', name:'عمار فادي عوض',                   nameEn:'Ammar Fadi Awad',               role:'مصوّر منتجات',       roleEn:'Product Photographer', criteria:'photographer',  supervisor:'amin_sup' }
+                        { id:'ammar', name:'عمار فادي عوض',                   nameEn:'Ammar Fadi Awad',               role:'مصوّر منتجات',       roleEn:'Product Photographer', criteria:'photographer',  supervisor:'amin_sup' }
                     ]
                 },
                 {
@@ -2407,7 +2408,7 @@ const ORGANIZATION_DATA = {
                     nameEn: 'Video Editing Team',
                     supervisor: 'amin_sup',
                     employees: [
-                        { id:'sameh', name:'سامر عبد الواحد',                  nameEn:'Samer Abdul Wahed',             role:'محرر فيديو',         roleEn:'Video Editor',         criteria:'editor',         supervisor:'amin_sup' }
+                        { id:'samer', name:'سامر جنيد',                      nameEn:'Samer Jneid',                  role:'محرر فيديو',         roleEn:'Video Editor',         criteria:'editor',         supervisor:'amin_sup' }
                     ]
                 },
                 {
