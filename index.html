@@ -1488,15 +1488,36 @@ async function login() {
     console.log('✅ تم تسجيل الدخول بنجاح:', currentUser.name);
 }
 
+function enforceAuth() {
+    const login = document.getElementById('loginScreen');
+    const topbar = document.getElementById('userTopBar');
+    const main = document.getElementById('mainApp');
+    if (currentUser) return;
+    if (login && getComputedStyle(login).display === 'none') login.style.display = 'flex';
+    if (topbar) topbar.style.display = 'none';
+    if (main) main.style.display = 'none';
+}
+
 function logout() {
     currentUser = null;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('userTopBar').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('loginUsername').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('loginDept').value = '';
+    // undo anything the print fitter / report left inline on the page
+    try { if (window.app && app.printFitReset) app.printFitReset(); } catch (e) {}
+    // close any open window so the next user starts clean
+    ['viewModal', 'archiveModal'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m) m.classList.remove('show');
+    });
+    enforceAuth();
+    const u = document.getElementById('loginUsername');
+    const pw = document.getElementById('loginPassword');
+    const d = document.getElementById('loginDept');
+    if (u) u.value = '';
+    if (pw) pw.value = '';
+    if (d) d.value = '';
     setPasswordVisibility(false);
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if (u) u.focus();
+    console.log('✅ تم تسجيل الخروج');
 }
 
 function showApp() {
@@ -1544,6 +1565,8 @@ document.getElementById('btnLogin').addEventListener('click', login);
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
 document.getElementById('btnLogout').addEventListener('click', logout);
+window.addEventListener('pageshow', () => { if (!currentUser) enforceAuth(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !currentUser) enforceAuth(); });
 
 // إظهار / إخفاء كلمة المرور
 function setPasswordVisibility(visible) {
@@ -1779,9 +1802,9 @@ const SUPERVISORS = {
     anas_sup:       { id:'anas_sup',      name:'أنس محمد السرداني',         position:{ ar:'مسؤول قسم الرخام',                 en:'Marble Manager' } },
     hr_sup:         { id:'hr_sup',        name:'إدارة الموارد البشرية',     position:{ ar:'الإشراف على وظائف الإدخال والدعم', en:'Data Entry & Support Supervision' } },
     // فرق المشاريع: كل فورمان مشرف مباشر لعمالته
-    mousa:          { id:'mousa',         name:'موسى ابراهيم مغنين',        position:{ ar:'فورمان – فريق موسى',               en:'Foreman - Mousa Team' } },
+    mousa:          { id:'mousa',         name:'موسى ابراهيم موسى ابراهيم مغنين',        position:{ ar:'فورمان – فريق موسى',               en:'Foreman - Mousa Team' } },
     suhail:         { id:'suhail',        name:'سهيل احمد ذوالفقار احمد',    position:{ ar:'فورمان – فريق المشاريع',           en:'Foreman - Projects Team' } },
-    thaqib:         { id:'thaqib',        name:'ثاقب شوكت شوكت بيرفايز',     position:{ ar:'فورمان – فريق المشاريع',           en:'Foreman - Projects Team' } }
+    thaqib:         { id:'thaqib',        name:'ساقب شوكت شوكت بيرفايز',     position:{ ar:'فورمان – فريق المشاريع',           en:'Foreman - Projects Team' } }
 };
 
 // ============================================================
@@ -2421,17 +2444,18 @@ const ORGANIZATION_DATA = {
                     nameEn: 'Team Mousa',
                     supervisor: 'mamoun_sup',
                     employees: [
-                        { id:'mousa',   name:'موسى ابراهيم مغنين',              nameEn:'Mousa Ibrahim Moghnein',        role:'فورمان',             roleEn:'Foreman',            criteria:'foreman',          supervisor:'mamoun_sup' },
-                        { id:'omar_p',  name:'عمر علي حسن عبدالحميد القرشي',     nameEn:'Omar Ali Hassan Abdelhamid',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'ahmed_p', name:'احمد عادل محمد ابراهيم',          nameEn:'Ahmed Adel Mohammed Ibrahim',   role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'momen_p', name:'مومن محمود فهمي',                 nameEn:'Moemen Mahmoud Fahmy',          role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'mohamed_p',name:'محمد عبد العزيز حسن محمد',       nameEn:'Mohamed Abdel Aziz Hassan',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'derek',   name:'ديريك اهيابو اووكو',               nameEn:'Derek Ihiabo Okwo',             role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'dickson', name:'ديكسون انيم',                     nameEn:'Dickson Anim',                  role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'abbas',   name:'عباس عبد الله بنجوره',             nameEn:'Abbas Abdullah Bangoor',        role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'alsaed',  name:'السعيد صالح الطنطاوي',            nameEn:'Alsaeed Saleh Tantawi',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'mousa',   name:'موسى ابراهيم موسى ابراهيم مغنين',              nameEn:'Mousa Ibrahim Mousa Ibrahim Mughneen',        role:'فورمان',             roleEn:'Foreman',            criteria:'foreman',          supervisor:'mamoun_sup' },
+                        { id:'omar_p',  name:'عمر علي حسن عبد الحميد القرنشاوي',     nameEn:'Omar Ali Hassan Abdelhamid Al-Karnashawi',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'ahmed_p', name:'أحمد عادل محمد إبراهيم',          nameEn:'Ahmed Adel Mohammed Ibrahim',   role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'momen_p', name:'مؤمن محمود فهمي',                 nameEn:'Moamen Mahmoud Fahmy',          role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'mohamed_p',name:'محمد عبد العزيز حسن محمد',       nameEn:'Mohammed Abdelaziz Hassan Mohammed',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'derek',   name:'ديريك اهيابو اووكو',               nameEn:'Derek Ahiabo Ouko',             role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'dickson', name:'ديكسون انيم',                     nameEn:'Dixon Enim',                  role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'abbas',   name:'عباس عبد الله بنجوره',             nameEn:'Abbas Abdullah Benjoura',        role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'alsaed',  name:'السعيد صالح محمد صالح الطنطاوي',            nameEn:'El-Saeed Saleh Mohammed Saleh Al-Tantawi',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
                         { id:'qasim',   name:'قاسم ربيع خليل',                  nameEn:'Qassem Rabie Khalil',           role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
-                        { id:'najm',    name:'نجم محمد عبد الجليل',             nameEn:'Najm Mohamed Abdelgelil',       role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' }
+                        { id:'saqib_m',   name:'ساقب شوكت شوكت بيرفايز',                  nameEn:'Saqib Shaukat Shaukat Perfaiz',           role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' },
+                        { id:'najm',    name:'نجم محمد عبد الجليل',             nameEn:'Najm Mohammed Abdeljalil',       role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'mousa' }
                     ]
                 },
                 {
@@ -2440,32 +2464,32 @@ const ORGANIZATION_DATA = {
                     nameEn: 'Team Suhail',
                     supervisor: 'mamoun_sup',
                     employees: [
-                        { id:'suhail',  name:'سهيل احمد ذوالفقار احمد',          nameEn:'Suhail Ahmed Zulfiqar',         role:'فورمان',             roleEn:'Foreman',            criteria:'foreman',          supervisor:'mamoun_sup' },
-                        { id:'fares',   name:'فارس عبد الله الشناوي عمر',        nameEn:'Fares Abdullah Al-Shennawi',    role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'ahmed_r', name:'احمد راعي عمر عباس',               nameEn:'Ahmed Raee Omar Abbas',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'mohamed_h',name:'محمد حسن عيد الجوهري',            nameEn:'Mohamed Hassan Eid El-Gohary',   role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'omran',   name:'عمران محمد حسين',                 nameEn:'Omran Mohamed Hussein',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'mohieddin',name:'محي الدين حمد احمد محمد',         nameEn:'Mohieddin Hamad Ahmed',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'nouri',   name:'نوري حسين محمد',                 nameEn:'Nouri Hussein Mohamed',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'ziyad',   name:'ضياء الدين محمد علاء الدين',       nameEn:'Ziyad Mohammed Alaa El Din',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
-                        { id:'isaac',   name:'ايساك امواكو',                     nameEn:'Isaac Amuaku',                  role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' }
+                        { id:'suhail',  name:'سهيل احمد ذوالفقار احمد',          nameEn:'Suhail Ahmed Zulfiqar Ahmed',         role:'فورمان',             roleEn:'Foreman',            criteria:'foreman',          supervisor:'mamoun_sup' },
+                        { id:'fares',   name:'فارس عبد الله محمد الشناوي عمر',        nameEn:'Fares Abdullah Mohammed Al-Shennawi Omar',    role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'ahmed_r', name:'احمد راعي عمر عباس',               nameEn:'Ahmed Raai Omar Abbas',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'mohamed_h',name:'محمد حسن عيد الجوهري',            nameEn:'Mohammed Hassan Eid Al-Gohary',   role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'omran',   name:'عمران محمد حسين',                 nameEn:'Imran Mohammed Hussein',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'mohieddin',name:'محى الدين حمد احمد محمد',         nameEn:'Mohi Al-Din Hamad Ahmed Mohammed',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'nouri',   name:'نوري حسين محمد',                 nameEn:'Nouri Hussein Mohammed',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'ziyad',   name:'ضياء الدين محمد علاء الدين',       nameEn:'Diaa Al-Din Mohammed Alaa Al-Din',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' },
+                        { id:'isaac',   name:'ايساك امواكو',                     nameEn:'Isaac Amwako',                  role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'suhail' }
                     ]
                 },
                 {
                     id: 'projects_thaqib',
-                    name: 'فريق ثاقب',
-                    nameEn: 'Team Thaqib',
+                    name: 'فريق ساقب',
+                    nameEn: 'Team Saqib',
                     supervisor: 'mamoun_sup',
                     employees: [
-                        { id:'thaqib',      name:'ثاقب شوكت شوكت بيرفايز',         nameEn:'Thaqib Shukri Shukri',         role:'فورمان',             roleEn:'Foreman',            criteria:'foreman',          supervisor:'mamoun_sup' },
-                        { id:'saber',       name:'صابر شوكت محمد شوكت',            nameEn:'Saber Shukri Mohamed Shukri',   role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'mohamed_as',  name:'محمد عبد السلام شوكت',           nameEn:'Mohamed Abdelsalam Shukri',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'mohamed_a2',  name:'محمد عبد العزيز صابر محمد',      nameEn:'Mohamed Abdel Aziz Saber',      role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'ahmed_mustafa',name:'احمد مصطفى صابر شوكت',          nameEn:'Ahmed Mustafa Saber Shukri',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'mahmoud',     name:'محمود عبد الفتاح شوكت',          nameEn:'Mahmoud Abdelfattah Shukri',    role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'yasser',      name:'ياسر عبد الحميد شوكت',            nameEn:'Yasser Abdelhamid Shukri',      role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'soleiman',    name:'سليمان صابر شوكت',               nameEn:'Suleiman Saber Shukri',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
-                        { id:'mohamed_h2',  name:'محمد حسن عبد الحميد شوكت',        nameEn:'Mohamed Hassan Abdelhamid',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' }
+                        { id:'thaqib',      name:'ساقب شوكت شوكت بيرفايز',         nameEn:'Saqib Shaukat Shaukat Perfaiz',         role:'فورمان',             roleEn:'Foreman',            criteria:'foreman',          supervisor:'mamoun_sup' },
+                        { id:'saber',       name:'صابر عبدالستار محمد سليم',            nameEn:'Saber Abdelstar Mohammed Saleem',   role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'mohamed_as',  name:'محمد عبد الستار محمد',           nameEn:'Mohammed Abdelstar Mohammed',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'mohamed_a2',  name:'محمد عبد العزيز حسن محمد',      nameEn:'Mohammed Abdelaziz Hassan Mohammed',      role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'ahmed_mustafa',name:'احمد مصطفي محمد سليمان',          nameEn:'Ahmed Mostafa Mohammed Suleiman',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'mahmoud',     name:'محمود محمد سعيد بدر صقر',          nameEn:'Mahmoud Mohammed Saeed Badr Saqr',    role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'yasser',      name:'ياسر احمد العبد لله',            nameEn:'Yasser Al-Abdullah',      role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'soleiman',    name:'سليمان الحسن',               nameEn:'Suleiman Al-Hassan',         role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' },
+                        { id:'mohamed_h2',  name:'محمد حسان فهد الشواخ',        nameEn:'Mohammed Hassan Fahad Al-Shawakh',     role:'عامل مشروع',         roleEn:'Project Worker',    criteria:'project_worker',   supervisor:'thaqib' }
                     ]
                 }
             ]
