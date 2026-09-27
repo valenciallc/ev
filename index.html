@@ -1739,7 +1739,7 @@ const TRANSLATIONS = {
 // ============================================================
 const CONFIG = {
     STORAGE_KEY: 'valencia_evaluations',
-    TELEGRAM_BOT_TOKEN: '8281101424:AAG3n_Hsjh4LurKwloRjUGwq1DxiYrEUN7U',
+    TELEGRAM_BOT_TOKEN: '8211546767:AAE_PdlP_DDz6kuQZHNA9B0K5Y-6RizsVMg',
     TELEGRAM_CHAT_ID: '-1003528917325',
     DRAFT_KEY: 'valencia_evaluation_draft',
     GENERAL_TARGET: 40,
@@ -3381,7 +3381,9 @@ class EvaluationApp {
             const res = await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: form });
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.ok) {
-                const why = data.description || `HTTP ${res.status}`;
+                const why = res.status === 401
+                    ? (en ? 'bot token revoked - get a new one from @BotFather' : 'مفتاح البوت ملغى - خذ مفتاحاً جديداً من @BotFather')
+                    : (data.description || `HTTP ${res.status}`);
                 console.warn('Telegram:', res.status, why);
                 this.showNotification(en ? 'Telegram error' : 'خطأ في التليجرام',
                     en ? `Not delivered: ${why}` : `لم يتم الإرسال: ${why}`, 'error', 9000);
@@ -3411,8 +3413,17 @@ class EvaluationApp {
         const btn = document.getElementById('btnTestTelegram');
         if (btn) btn.disabled = true;
         try {
-            const me = await fetch(`https://api.telegram.org/bot${token}/getMe`).then(r => r.json());
-            if (!me.ok) throw new Error(me.description || 'getMe failed');
+            const meRes = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+            const me = await meRes.json().catch(() => ({}));
+            if (!me.ok) {
+                if (meRes.status === 401) {
+                    this.showNotification(en ? 'Bot token invalid' : 'مفتاح البوت غير صالح',
+                        en ? 'The token was revoked. Get a new one from @BotFather and put it in CONFIG.TELEGRAM_BOT_TOKEN.'
+                           : 'المفتاح ملغى. خذ مفتاحاً جديداً من @BotFather وضعه في CONFIG.TELEGRAM_BOT_TOKEN.', 'error', 14000);
+                    return;
+                }
+                throw new Error(me.description || 'getMe failed');
+            }
             const ch = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=${encodeURIComponent(chat)}`).then(r => r.json());
             if (ch.ok) {
                 this.showNotification(en ? 'Telegram OK' : 'اتصال التليجرام سليم',
